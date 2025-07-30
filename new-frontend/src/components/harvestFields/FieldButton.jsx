@@ -1,25 +1,19 @@
-import { CropsFieldsContext } from '../../globalStates/CropsFields';
-import './fieldButton.css';
+import { CropsFieldsContext } from "../../context/CropsFields";
+import "./fieldButton.css";
 import { useContext, useState } from "react";
 
-function FieldButton({
-  id, name
-}) {
-
+function FieldButton({ id, name }) {
   const { harvestedFields } = useContext(CropsFieldsContext);
   const [isSelected, setSelected] = useState(false);
 
-
-
-
   const addToSelectedFields = () => {
     harvestedFields.current.push(id);
-  }
+  };
 
   const removeFromSelectedFields = () =>
-    harvestedFields.current = harvestedFields.current.filter((fieldId) => fieldId != id);
-
-
+    (harvestedFields.current = harvestedFields.current.filter(
+      (fieldId) => fieldId != id
+    ));
 
   const toggleSelection = () => {
     setSelected(!isSelected);

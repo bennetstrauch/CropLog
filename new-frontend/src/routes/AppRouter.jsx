@@ -1,51 +1,52 @@
-import '../App.css'
+import { Route, Routes } from "react-router-dom";
+import { AuthProvider } from "../authentification/AuthContext";
+import { CropsFieldsProvider } from "../context/CropsFields";
 
-import {
-  Route,
-  Routes,
-} from "react-router-dom";
-import MainPage from "../pages/MainPage";
-import CheckAuth from "./CheckAuth";
+// Layouts
+import AuthLayout from "../authentification/AuthLayout";
+import CheckAuth from "./CheckAuth"; // Your component to protect routes
+
+// Pages
 import Login from "../authentification/Login";
 import Register from "../authentification/Register";
-import { CropsFieldsProvider } from '../globalStates/CropsFields';
-import FinalizeEntry from '../components/newHarvestEntry/FinalizeEntry';
-import HarvestLog from '../pages/HarvestLog';
-import Authentication from '../authentification/Authentication';
+import MainPage from "../pages/MainPage";
+import FinalizeEntry from "../components/newHarvestEntry/FinalizeEntry";
+import HarvestLog from "../pages/HarvestLog";
+import NotFoundPage from "../pages/NotFoundPage"; // A component for 404 errors
 
-
+// Path Constants
 export const Path_HarvestLog = "/harvest-log";
-export const Path_ModifyCrops = "/modify-crops";
 export const Path_NewEntry = "/new-entry";
-
+export const Path_Login = "/login";
+export const Path_Register = "/register";
 
 function AppRouter() {
   return (
-
-    <Routes>
-      {/* Public Routes */}
-      <Route path="login" element={<Authentication />} />
-      <Route path="register" element={<Authentication />} />
-
-      {/* Protected Routes */}
-      <Route element={<CheckAuth />}>
-        <Route element={<CropsFieldsProvider />}>
-
-          <Route path={Path_NewEntry} element={<MainPage />} />
-          <Route path="/" element={<MainPage />} />
-
-          <Route path={Path_NewEntry + "/:cropName"} element={<FinalizeEntry />} />
-
-          <Route path={Path_HarvestLog} element={<HarvestLog />} />
-          {/* <Route path={Path_ModifyCrops} element={<ModifyCrops />} /> */}
+    <AuthProvider>
+      <Routes>
+        {/* 1. Public routes with a shared layout */}
+        <Route element={<AuthLayout />}>
+          <Route path={Path_Login} element={<Login />} />
+          <Route path={Path_Register} element={<Register />} />
         </Route>
-      </Route>
 
-      {/* # catch page not found */}
-      {/* <Route path="*" element={<Missing />} /> */}
-
-    </Routes>
-
+        {/* 2. Protected routes that require a logged-in user */}
+        <Route element={<CheckAuth />}>
+          <Route element={<CropsFieldsProvider />}>
+            <Route path="/" element={<MainPage />} />
+            <Route path={Path_NewEntry} element={<MainPage />} />
+            <Route path={Path_HarvestLog} element={<HarvestLog />} />
+            <Route
+              path={`${Path_NewEntry}/:cropName`}
+              element={<FinalizeEntry />}
+            />
+          </Route>
+        </Route>
+        
+        {/* 3. Catch-all route for pages that don't exist */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 

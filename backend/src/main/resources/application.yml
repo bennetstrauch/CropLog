@@ -2,9 +2,16 @@ spring:
   application:
     name: backend
   datasource:
+#    url: jdbc:postgresql://ep-still-sunset-a53rpn5q-pooler.us-east-2.aws.neon.tech/croplog_base
+#    username: neondb_owner
+#    password: npg_HZVaiL8Js5Am
+    url: postgresql://postgres:ciB55-net@db.alitamacelzglkdfuojd.supabase.co:5432/postgres
+    username: postgres
     password: ciB55-net
-    url: jdbc:mysql://localhost:3306/Spring_Harvest_Db
-    username: root
+    properties:
+      sslmode: require
+#    username: root
+#    password: ciB55-net
   jpa:
     hibernate:
       ddl-auto: create
@@ -16,6 +23,8 @@ spring:
         jdbc:
           order_inserts: true
           order_updates: true
+          lob:
+            non_contextual_creation: true
         default_batch_fetch_size: 25
 
     show-sql: true
@@ -23,7 +32,7 @@ spring:
     generate-ddl: true
   sql:
      init:
-      mode: always
+      mode: never
 
 #  security.oauth2:
 #    resourceserver:
