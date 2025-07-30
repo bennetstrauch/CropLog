@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "../authentification/AuthContext";
-import { CropsFieldsProvider } from "../context/CropsFields";
+import { CropsFieldsProvider } from "../context/CropsFieldsProvider";
 
 // Layouts
 import AuthLayout from "../authentification/AuthLayout";
@@ -42,7 +42,7 @@ function AppRouter() {
             />
           </Route>
         </Route>
-        
+
         {/* 3. Catch-all route for pages that don't exist */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

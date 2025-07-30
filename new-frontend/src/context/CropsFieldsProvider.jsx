@@ -43,7 +43,7 @@ export const CropsFieldsProvider = ({ children }) => { // Pass children through
 
   return (
     <CropsFieldsContext.Provider value={contextValue}>
-      {children} {/* Render children instead of Outlet for more flexibility */}
+      <Outlet />
     </CropsFieldsContext.Provider>
   );
 };

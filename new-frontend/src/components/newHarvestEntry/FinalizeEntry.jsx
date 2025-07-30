@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import QuantityInput from "./QuantityInput";
 import SelectFields from "../harvestFields/SelectFields";
 import { getCurrentDate } from "../../service/utils";
-import { CropsFieldsContext } from "../../context/CropsFields";
+import { CropsFieldsContext } from "../../context/CropsFieldsProvider";
 import { post } from "../../service/apiService";
 import GoBackButton from "../universal/GoBackButton";
 

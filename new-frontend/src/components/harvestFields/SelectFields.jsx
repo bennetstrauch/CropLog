@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { mapToHTML } from "../../service/utils";
 import FieldButton from "./FieldButton";
-import { CropsFieldsContext } from "../../context/CropsFields";
+import { CropsFieldsContext } from "../../context/CropsFieldsProvider";
 
 function SelectFields({}) {
   const { fields } = useContext(CropsFieldsContext);
