@@ -10,9 +10,9 @@ import CheckAuth from "./CheckAuth"; // Your component to protect routes
 import Login from "../authentification/Login";
 import Register from "../authentification/Register";
 import MainPage from "../pages/MainPage";
-import FinalizeEntry from "../components/newHarvestEntry/FinalizeEntry";
 import HarvestLog from "../pages/HarvestLog";
 import NotFoundPage from "../pages/NotFoundPage"; // A component for 404 errors
+import FinalizeEntry from "../Components/newHarvestEntry/finalizeEntry";
 
 // Path Constants
 export const Path_HarvestLog = "/harvest-log";

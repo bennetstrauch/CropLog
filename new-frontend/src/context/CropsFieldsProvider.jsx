@@ -1,28 +1,47 @@
 import { Outlet } from "react-router-dom";
 // Use the refactored service
-import { get } from "../service/apiService"; 
-import { createContext, useEffect, useState } from "react";
+import { get, getLatestHarvestRecord } from "../service/apiService";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export const CropsFieldsContext = createContext();
 
-export const CropsFieldsProvider = ({ children }) => { // Pass children through
+export const CropsFieldsProvider = ({ children }) => {
+  // Pass children through
   console.log("RENDER CropsFieldsProvider");
 
+  const [loading, setLoading] = useState(true); //# Add a loading state
+
+  // const [latestEntry, setLatestEntry] = useState(null);
   const [crops, setCrops] = useState([]);
   const [fields, setFields] = useState([]);
-  const [loading, setLoading] = useState(true); //# Add a loading state
+
+  // const fetchLatestEntry = async () => {
+  //   try {
+  //     const latest = await getLatestHarvestRecord();
+  //     setLatestEntry(latest);
+  //   } catch (error) {
+  //     if (error.response?.status === 404) {
+  //       console.warn("No latest entry found.");
+  //       setLatestEntry(null);
+  //     } else {
+  //       console.error("Error fetching latest entry:", error);
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Parallel fetching is more efficient!
         const [cropsData, fieldsData] = await Promise.all([
-          get("crops"),      // Endpoint is /api/crops
-          get("fields")      // Endpoint is /api/fields
+          get("crops"), // Endpoint is /api/crops
+          get("fields"), // Endpoint is /api/fields
         ]);
-        
+
         setCrops(cropsData);
         setFields(fieldsData);
+
+        // await fetchLatestEntry();
       } catch (error) {
         console.error("Failed to fetch initial data:", error);
         // Handle error, e.g., redirect to login if unauthorized
@@ -37,9 +56,8 @@ export const CropsFieldsProvider = ({ children }) => { // Pass children through
   if (loading) {
     return <div>Loading...</div>; // Show a loading indicator
   }
-  
-  // Note: The value from useRef is in '.current'
-  const contextValue = { crops, fields };
+
+  const contextValue = { crops, fields};
 
   return (
     <CropsFieldsContext.Provider value={contextValue}>
@@ -47,3 +65,7 @@ export const CropsFieldsProvider = ({ children }) => { // Pass children through
     </CropsFieldsContext.Provider>
   );
 };
+
+export const ProvideCropsAndFieldsContext = () =>
+  useContext(CropsFieldsContext);
+

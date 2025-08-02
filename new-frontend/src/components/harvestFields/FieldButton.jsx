@@ -1,17 +1,17 @@
-import { CropsFieldsContext } from "../../context/CropsFieldsProvider";
+import { ProvideCropsAndFieldsContext } from "../../context/CropsFieldsProvider";
 import "./fieldButton.css";
-import { useContext, useState } from "react";
+import { useState } from "react";
 
-function FieldButton({ id, name }) {
-  const { harvestedFields } = useContext(CropsFieldsContext);
+function FieldButton({ id, name, harvestedFieldsRef }) {
+  console.log("RENDER FieldButton, harvestedFields:", harvestedFieldsRef.current);
   const [isSelected, setSelected] = useState(false);
 
   const addToSelectedFields = () => {
-    harvestedFields.current.push(id);
+    harvestedFieldsRef.current.push(id);
   };
 
   const removeFromSelectedFields = () =>
-    (harvestedFields.current = harvestedFields.current.filter(
+    (harvestedFieldsRef.current = harvestedFieldsRef.current.filter(
       (fieldId) => fieldId != id
     ));
 

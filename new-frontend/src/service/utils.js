@@ -54,3 +54,11 @@ export function mapToHTML(listToMap, htmlElement) {
   
     return html;
   }
+
+
+
+  export const validateDate = (date) => {
+  // Regex to match the pattern YYYY-MM-DD
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+  return datePattern.test(date);
+};

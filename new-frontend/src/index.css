@@ -54,6 +54,72 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+button.highlightAsSelected {
+  background-color: coral;
+}
+
+button.deleteLatestEntry {
+  background-color: darkblue;
+}
+
+div.turquoiseBorder_Div {
+  border: 2px solid #008080; /* Darker turquoise color */
+  padding: 20px; /* Add padding around the content */
+  border-radius: 8px; /* Slightly rounded corners for a softer look */
+  /* box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); Subtle shadow for depth */
+  /* width: fit-content; Adjust the width to fit the content */
+  margin: 20px auto; /* Center the div horizontally */
+}
+
+div.latestEntry {
+  background-color: #0275d8;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.navbar button {
+  background: none; /* Remove default button styling */
+  border-radius: 0px;
+  border: none;
+  font-size: 18px; /* Size of the text */
+  font-weight: 400;
+  color: gray; /* Default color */
+  cursor: pointer;
+  padding: 10;
+}
+
+.navbar button.active {
+  font-weight: bold; /* Bold text for active item */
+  color: rgb(188, 191, 191); /* Black color for active item */
+  border-bottom: 2px solid rgb(188, 191, 191); /* Black underline for active item */
+}
+
+.navbar button:focus {
+  outline: none; /* Remove focus outline */
+  font-weight: bold; /* Bold text for active item */
+  color: rgb(188, 191, 191); /* Black color for active item */
+  border-bottom: 2px solid rgb(188, 191, 191);
+}
+
+.navbar button:hover {
+  color: rgb(255, 155, 73); /* Change color when hovering over items */
+}
+
+.notVisible {
+  display: none;
+}
+
+.timeframe-navigation {
+  display: flex;
+  justify-content: center; /* Center the buttons */
+  
+}
+
+
+tr.highlight td{
+  font-weight: bold;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -66,7 +132,3 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
-
-
-
-

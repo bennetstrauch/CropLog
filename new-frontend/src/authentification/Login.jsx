@@ -1,33 +1,33 @@
-import React, { useState } from 'react';
-import { z } from 'zod';
-import { loginUser } from '../service/apiService';
-import { useAuth } from './AuthContext';
-import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../reduxStore/Slices/AuthSlice';
-import { useNavigate } from 'react-router-dom';
-import { Path_NewEntry } from '../routes/AppRouter';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSuccess } from "../reduxStore/Slices/AuthSlice";
+import { loginUser, registerUser } from "../service/apiService";
 
-
-// Define the schema using Zod
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters long."),
+  email: z.string().email("Please enter a valid email."),
+  password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const loggedIn = useSelector((state) => state.auth.loggedIn);
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [activeSection, setActiveSection] = useState("login");
+  const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError(''); // Clear previous errors
+  useEffect(() => {
+    if (loggedIn) {
+      navigate("/");
+    }
+  }, [loggedIn]);
 
-    // 1. Validate input with Zod
+  const handleLogin = async () => {
+    setError("");
     const validation = loginSchema.safeParse({ email, password });
     if (!validation.success) {
       setError(validation.error.errors[0].message);
@@ -35,47 +35,77 @@ const Login = () => {
     }
 
     try {
-      // 2. Call the centralized API service
       const response = await loginUser({ email, password });
-      
-      // 3. Use the AuthContext to handle the token and navigation
-      if (response.token) {
-            dispatch(loginSuccess({ token: response.token, user: response.user })); 
-            navigate(Path_NewEntry)
-      }
+      dispatch(loginSuccess({ token: response.token, user: response.user }));
+      navigate("/");
     } catch (err) {
-      // 4. Set state to display errors gracefully
-      setError('Invalid email or password. Please try again.');
-      console.error(err);
+      setError("Invalid email or password.");
     }
   };
 
+  const handleRegister = async () => {
+    setError("");
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
+      return;
+    }
+
+    try {
+      await registerUser({ email, password });
+      alert("Registration successful!");
+      setActiveSection("login");
+    } catch (err) {
+      setError("Failed to register. Try again.");
+    }
+  };
+
+  const renderInput = () => (
+    <div>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+      />
+      <br />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+      />
+    </div>
+  );
+
+  const renderNavBar = () => (
+    <div className="navbar">
+      <button onClick={() => setActiveSection("login")}>Login</button>
+      <button onClick={() => setActiveSection("register")}>Register</button>
+    </div>
+  );
+
   return (
     <div>
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Email:</label>
-          <input 
-            type="email" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            required 
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input 
-            type="password" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            required 
-          />
-        </div>
-        {/* Conditionally render the error message */}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit">Login</button>
-      </form>
+      {renderNavBar()}
+      <br />
+      <div className="turquoiseBorder_Div">
+        {activeSection === "login" && (
+          <div>
+            {renderInput()}
+            <br />
+            <button onClick={handleLogin}>Login</button>
+          </div>
+        )}
+        {activeSection === "register" && (
+          <div>
+            {renderInput()}
+            <br />
+            <button onClick={handleRegister}>Register</button>
+          </div>
+        )}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+      </div>
     </div>
   );
 };

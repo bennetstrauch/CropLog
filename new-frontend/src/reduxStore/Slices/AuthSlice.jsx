@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { useNavigate } from "react-router-dom";
 
 // Check for the token in localStorage to define the initial state
 const token = localStorage.getItem('jwt_token');

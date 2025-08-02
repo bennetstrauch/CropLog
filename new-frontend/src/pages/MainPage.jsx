@@ -1,39 +1,205 @@
-import React from 'react'
-import SelectCrop from '../components/newHarvestEntry/SelectCrop';
-import { useNavigate } from 'react-router-dom';
-import { Path_HarvestLog } from '../routes/AppRouter';
+import React, { useRef } from "react";
+import { useState } from "react";
+import "../App.css";
+import "../index.css";
+import { getHarvestEntry, postHarvestEntry } from "../service/apiService";
+import { useNavigate } from "react-router-dom";
+import { getCurrentDate, validateDate } from "../service/utils";
+import DateInputField from "../Components/newHarvestEntry/DateInputField";
+import SelectCrop from "../Components/newHarvestEntry/SelectCrop";
+import FinalizeEntry from "../Components/newHarvestEntry/finalizeEntry";
+import { useDispatch } from "react-redux";
+import { ProvideCropsAndFieldsContext } from "../context/CropsFieldsProvider";
+import { Path_HarvestLog } from "../routes/AppRouter";
+import { logout } from "../reduxStore/Slices/AuthSlice";
+import useHarvestForm from "../components/newHarvestEntry/useHarvestForm";
+import useHarvestSubmit from "../components/newHarvestEntry/useHarvestSubmit";
 
-const MainPage = () => {
-  console.log("RENDER MainPage");
+// import "bootstrap/dist/css/bootstrap.min.css";
+//# warning --> each child should have unique key (fixit)
 
+function MainPage() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const {
+    harvestDate,
+    setHarvestDate,
+    selectedCrop,
+    setSelectedCrop,
+    harvestedAmount,
+    setHarvestedAmount,
+    harvestedFieldsRef,
+    setHarvestedFields,
+    resetForm,
+  } = useHarvestForm();
 
-  // global navigateToButton constant ##
-  const harvestLog_Button = (
-    <button onClick={() => navigate(Path_HarvestLog)}> Harvest Log </button>
+  console.log("MainPage - harvestedFields:", harvestedFieldsRef);
+
+  const { setLatestEntry } = ProvideCropsAndFieldsContext();
+  const { submitHarvestEntry } = useHarvestSubmit(setLatestEntry);
+
+  const [showDateInputField, setShowDateInputField] = useState(false);
+
+  //
+  const cropIsNotYetSelected = selectedCrop == "";
+  const cropIsSelected = selectedCrop != "";
+
+  const displayBeforeCropHasBeenSelected = cropIsNotYetSelected
+    ? "visible"
+    : "notVisible";
+  const displayIfCropHasBeenSelected = cropIsSelected
+    ? "visible"
+    : "notVisible";
+
+  const displayIfModifyDateButtonPressed =
+    showDateInputField && cropIsNotYetSelected ? "visible" : "notVisible";
+
+  const resetHarvestDate = () => setHarvestDate(getCurrentDate);
+  const resetCropSelection = () => setSelectedCrop("");
+  const resetHarvestedFields = () => setHarvestedFields([]);
+  const resetHarvestedAmount = () => setHarvestedAmount(0.0);
+
+  const dateNotValid = !validateDate(harvestDate);
+  // # make function and call it
+  if (cropIsSelected) {
+    if (dateNotValid) {
+      alert("Invalid date format. Please use YYYY-MM-DD.");
+
+      resetCropSelection();
+    }
+  }
+
+  let harvestEntryObject = {
+    harvestDate: harvestDate,
+    cropName: selectedCrop,
+    harvestedAmount: harvestedAmount,
+    // sortFields ?
+    harvestedFieldsRef: harvestedFieldsRef,
+  };
+
+  //###reset button selection if time, disallow 0 values
+
+  // --------- LAYER 4 -----------------------------------------------------
+
+  async function postHarvestEntryAndSetLatestEntry() {
+    const addedEntryId = await postHarvestEntry(harvestEntryObject);
+    console.log("addedEntryId", addedEntryId);
+
+    const addedEntry = await getHarvestEntry(addedEntryId);
+    setLatestEntry(addedEntry);
+    console.log("added Entry", addedEntry);
+  }
+
+  // ----------- LAYER 3 --------------------------------------------
+
+  const goBack = () => {
+    resetHarvestDate();
+    resetCropSelection();
+    resetHarvestedFields();
+    resetHarvestedAmount();
+    setShowDateInputField(false);
+    console.log(harvestedFieldsRef, harvestedAmount);
+  };
+
+  const goToHarvestLogPage = () => {
+    console.log("harvestLogButton pressed");
+    navigate(Path_HarvestLog);
+  };
+
+  const toggleDateInputField = () => {
+    setShowDateInputField((previousState) => !previousState);
+
+    if (showDateInputField == false) resetHarvestDate();
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login"); // optional redirect
+  };
+
+  const submitEntryAndGoBack = async () => {
+    const success = await submitHarvestEntry({
+      harvestDate,
+      cropName: selectedCrop,
+      harvestedAmount,
+      harvestedFields: harvestedFieldsRef.current,
+    });
+
+    if (success) {
+      resetForm();
+      goBack();
+    }
+  };
+  // #cleanup!!, edit delete, layout #add time if from same day instead of date
+
+  // --------- LAYER 2 --------------------------------------------
+
+  const goBackArrow = (
+    <button className={displayIfCropHasBeenSelected} onClick={goBack}>
+      ← Back
+    </button>
   );
+
+  const harvestLog_Button = (
+    <button
+      className={displayBeforeCropHasBeenSelected}
+      onClick={goToHarvestLogPage}
+    >
+      Harvest Log
+    </button>
+  );
+
+  const modifyDate_Button = (
+    <button
+      className={displayBeforeCropHasBeenSelected}
+      onClick={toggleDateInputField}
+      Modify
+      Date
+    >
+      {showDateInputField ? "Hide Date Input" : "Modify Date"}
+    </button>
+  );
+
+  const logout_Button = <button onClick={handleLogout}>Logout</button>;
+
+  const dateInputField = (
+    <div className={displayIfModifyDateButtonPressed}>
+      <DateInputField
+        harvestDate={harvestDate}
+        setHarvestDate={setHarvestDate}
+      />
+    </div>
+  );
+
+  // ------------------------------------------------------------
+  // ----------- LAYER 1 ----------------------------------------
 
   const head = (
     <header>
+      {goBackArrow}
       {harvestLog_Button}
-      {/* {modifyDate_Button}
-      {logout_Button} */}
+      {modifyDate_Button}
+      {logout_Button}
+      {dateInputField}
     </header>
   );
 
+  // ------ LAYER 0 ------------------------------------------------------
+
   return (
-    <div className="mainPage"> MainPage
+    <div className="firstWindow">
       {head}
 
       <br />
 
+      <SelectCrop harvestedFieldsRef={harvestedFieldsRef} />
+      {/* {cropIsNotYetSelected ?
+        <SelectCrop />
 
-      <SelectCrop />
-
-
+        : <FinalizeEntry harvestedFields={harvestedFields} />} */}
     </div>
   );
 }
 
-export default MainPage
+export default MainPage;

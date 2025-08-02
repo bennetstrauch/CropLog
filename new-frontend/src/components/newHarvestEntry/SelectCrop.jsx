@@ -4,7 +4,7 @@ import CropButtons from './CropButtons';
 
 
 
-const SelectCrop = () => {
+const SelectCrop = ({ harvestedFieldsRef }) => {
   console.log("RENDER SelectCrop");
 
   // const modifyCropsButton = (
@@ -14,15 +14,19 @@ const SelectCrop = () => {
   //   </button>
   // );
 
+ 
+
 
   return (
     <div>NewEntry
+
+
       {/* <DisplayLatestEntry/> */}
 
       <br />
 
       <p> Please select crop: </p>
-      <CropButtons />
+       <CropButtons harvestedFieldsRef={harvestedFieldsRef} />
 
       <br />
 

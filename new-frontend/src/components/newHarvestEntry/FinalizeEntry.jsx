@@ -4,43 +4,46 @@ import QuantityInput from "./QuantityInput";
 import SelectFields from "../harvestFields/SelectFields";
 import { getCurrentDate } from "../../service/utils";
 import { CropsFieldsContext } from "../../context/CropsFieldsProvider";
-import { post } from "../../service/apiService";
+import { post, postHarvestEntry } from "../../service/apiService";
 import GoBackButton from "../universal/GoBackButton";
 
 const FinalizeEntry = () => {
   const navigate = useNavigate();
-  const harvestedCrop = useLocation().state.harvestedCrop;
-  console.log("RENDER FinalizeEntry,   harvestedCrop", harvestedCrop);
+  const { state } = useLocation();
+
+  // Add a safety check in case someone navigates to this URL directly
+  if (!state) {
+    // You can redirect them or show an error message
+    return <div>Error: Missing entry data. Please start a new entry.</div>;
+  }
+
+  // ✅ Destructure BOTH pieces of data from the location state
+  const { harvestedCrop, harvestedFieldsRef } = state;
+  
+  console.log("RENDER FinalizeEntry,   harvestedCrop", harvestedCrop, "harvestedFields", harvestedFieldsRef);
 
   const harvestDate = useRef(getCurrentDate());
   const harvestedQuantity = useRef(0.0);
   // # leave in context or define here?
-  const { harvestedFields } = useContext(CropsFieldsContext);
 
   // # put in context if needed elsewhere
   const goBack = () => {
     navigate(-1);
   };
 
+
   // ## global variables for backend and frontend? harvestDate, cropId, etc...
   function prepareEntry() {
     let newEntry = {
-      harvestDate: harvestDate.current,
+      date: harvestDate.current,
       cropId: harvestedCrop.id,
-      quantity: harvestedQuantity.current.value,
-      harvestedFieldIds: harvestedFields.current,
+      fieldIds: harvestedFieldsRef.current,
+      harvestedQuantity: harvestedQuantity.current.value,
     };
 
     console.log("newEntry", newEntry);
 
     return newEntry;
-  }
-
-  async function postHarvestEntry(newEntry) {
-    const addedEntryId = await post("harvest-entries", newEntry);
-    console.log("addedEntryId", addedEntryId);
-
-    return addedEntryId;
   }
 
   // async function getLatestEntry(id) {
@@ -51,9 +54,11 @@ const FinalizeEntry = () => {
 
   const handleEntrySubmission = () => {
     const newEntry = prepareEntry();
+    console.log("Submitting new entry:", newEntry);
     const addedEntryId = postHarvestEntry(newEntry);
     // getLatestEntry(addedEntryId);
 
+    
     goBack();
   };
 
@@ -72,7 +77,7 @@ const FinalizeEntry = () => {
       <GoBackButton />
       <br /> <br />
       <QuantityInput {...{ harvestedQuantity, harvestedCrop }} />
-      <SelectFields {...{ harvestedFields, harvestedCrop }} />
+      <SelectFields {...{ harvestedFieldsRef, harvestedCrop }} />
       <br />
       {submitEntry_Button}
       {/* {modifyFieldsButton} */}

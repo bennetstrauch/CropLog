@@ -3,24 +3,27 @@ import axios from "axios";
 
 // Create an Axios instance
 const API = axios.create({
-  baseURL: 'http://localhost:8080/api/',
+  // baseURL: 'http://localhost:8080/api/',
+  baseURL: "https://harvest-log.onrender.com/api/",
 });
 
 // Use an interceptor to add the auth token to every request
-API.interceptors.request.use((config) => {
-  // Retrieve the token from local storage
-  const token = localStorage.getItem('jwt_token');
-  
-  if (token) {
-    // Add the token to the Authorization header
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+API.interceptors.request.use(
+  (config) => {
+    // Retrieve the token from local storage
+    const token = localStorage.getItem("jwt_token");
 
+    if (token) {
+      // Add the token to the Authorization header
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // --- Generic HTTP Methods ---
 // You don't need to pass userId anymore. The backend gets it from the token.
@@ -67,14 +70,30 @@ export async function getEntriesFilteredBy(dateRange, cropIds = []) {
 
   // Add each crop ID to the params
   if (cropIds && cropIds.length > 0) {
-    cropIds.forEach(id => params.append('cropIds', id));
+    cropIds.forEach((id) => params.append("cropIds", id));
   }
-  
+
   // Your backend endpoint is '/api/harvest-record/filtered'
   const endpoint = `harvest-record/filtered?${params.toString()}`;
   return get(endpoint);
+} 
+
+export async function getHarvestEntry(id) {
+  return await get(`harvestEntry/${id}`);
 }
 
+
+export async function getLatestHarvestRecord() {
+  return await get("harvest-record/latest");
+}
+
+export async function postHarvestEntry(entry) {
+  const response = await post("harvest-record", entry);
+  return response.id;
+}
+
+
 // You'll also need auth-specific calls
-export const loginUser = (credentials) => post('auth/login', credentials);
-export const registerUser = (userData) => post('auth/register', userData);
+export const loginUser = (credentials) => post("auth/login", credentials);
+export const registerUser = (userData) => post("auth/register", userData);
+

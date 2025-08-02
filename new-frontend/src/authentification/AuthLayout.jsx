@@ -5,10 +5,10 @@ const AuthLayout = () => {
   return (
     <div className="auth-container">
       {/* Shared navigation for Login and Register */}
-      <nav className="auth-nav">
+      {/* <nav className="auth-nav">
         <NavLink to="/login">Login</NavLink>
         <NavLink to="/register">Register</NavLink>
-      </nav>
+      </nav> */}
 
       <main>
         {/* The Login or Register component will be rendered here */}
