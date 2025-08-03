@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 // Use the refactored service
 import { get, getLatestHarvestRecord } from "../service/apiService";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export const CropsFieldsContext = createContext();
 
@@ -14,6 +14,15 @@ export const CropsFieldsProvider = ({ children }) => {
   // const [latestEntry, setLatestEntry] = useState(null);
   const [crops, setCrops] = useState([]);
   const [fields, setFields] = useState([]);
+
+  const cropsMap = useMemo(
+    () => Object.fromEntries(crops.map((c) => [c.id, c])),
+    [crops]
+  );
+  const fieldsMap = useMemo(
+    () => Object.fromEntries(fields.map((f) => [f.id, f])),
+    [fields]
+  );
 
   // const fetchLatestEntry = async () => {
   //   try {
@@ -28,6 +37,8 @@ export const CropsFieldsProvider = ({ children }) => {
   //     }
   //   }
   // };
+
+  // ## field and crop ids are fetched, how to map from this to the actual names / objects for the harvest log?
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,7 +68,7 @@ export const CropsFieldsProvider = ({ children }) => {
     return <div>Loading...</div>; // Show a loading indicator
   }
 
-  const contextValue = { crops, fields};
+  const contextValue = { crops, fields, cropsMap, fieldsMap };
 
   return (
     <CropsFieldsContext.Provider value={contextValue}>
@@ -68,4 +79,3 @@ export const CropsFieldsProvider = ({ children }) => {
 
 export const ProvideCropsAndFieldsContext = () =>
   useContext(CropsFieldsContext);
-
