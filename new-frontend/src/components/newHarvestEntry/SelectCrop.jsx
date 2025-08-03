@@ -4,7 +4,7 @@ import CropButtons from './CropButtons';
 
 
 
-const SelectCrop = ({ harvestedFieldsRef }) => {
+const SelectCrop = ({ harvestDate, harvestedFieldsRef }) => {
   console.log("RENDER SelectCrop");
 
   // const modifyCropsButton = (
@@ -26,7 +26,7 @@ const SelectCrop = ({ harvestedFieldsRef }) => {
       <br />
 
       <p> Please select crop: </p>
-       <CropButtons harvestedFieldsRef={harvestedFieldsRef} />
+       <CropButtons {...{harvestedFieldsRef, harvestDate}} />
 
       <br />
 

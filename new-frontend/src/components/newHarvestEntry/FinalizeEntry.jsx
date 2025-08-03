@@ -18,11 +18,10 @@ const FinalizeEntry = () => {
   }
 
   // ✅ Destructure BOTH pieces of data from the location state
-  const { harvestedCrop, harvestedFieldsRef } = state;
-  
+  const { harvestDate, harvestedCrop, harvestedFieldsRef } = state;
+
   console.log("RENDER FinalizeEntry,   harvestedCrop", harvestedCrop, "harvestedFields", harvestedFieldsRef);
 
-  const harvestDate = useRef(getCurrentDate());
   const harvestedQuantity = useRef(0.0);
   // # leave in context or define here?
 
@@ -35,7 +34,7 @@ const FinalizeEntry = () => {
   // ## global variables for backend and frontend? harvestDate, cropId, etc...
   function prepareEntry() {
     let newEntry = {
-      date: harvestDate.current,
+      date: harvestDate,
       cropId: harvestedCrop.id,
       fieldIds: harvestedFieldsRef.current,
       harvestedQuantity: harvestedQuantity.current.value,

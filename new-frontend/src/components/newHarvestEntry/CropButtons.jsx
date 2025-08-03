@@ -6,7 +6,7 @@ import { CropsFieldsContext } from "../../context/CropsFieldsProvider";
 import { useNavigate } from "react-router-dom";
 import { Path_NewEntry } from "../../routes/AppRouter";
 
-function CropButtons({ harvestedFieldsRef }) {
+function CropButtons({ harvestDate, harvestedFieldsRef }) {
   const navigate = useNavigate();
   const { crops } = useContext(CropsFieldsContext);
 
@@ -16,7 +16,7 @@ function CropButtons({ harvestedFieldsRef }) {
 
     // naviagte to path and pass selected crop as state
     navigate(Path_NewEntry + "/" + crop.name, {
-      state: { harvestedCrop: crop, harvestedFieldsRef: harvestedFieldsRef },
+      state: { harvestDate: harvestDate, harvestedCrop: crop, harvestedFieldsRef: harvestedFieldsRef },
     });
   };
 

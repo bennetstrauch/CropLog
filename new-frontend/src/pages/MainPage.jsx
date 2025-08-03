@@ -70,6 +70,8 @@ function MainPage() {
     }
   }
 
+  // ##### not necessary
+
   let harvestEntryObject = {
     harvestDate: harvestDate,
     cropName: selectedCrop,
@@ -120,7 +122,7 @@ function MainPage() {
 
   const submitEntryAndGoBack = async () => {
     const success = await submitHarvestEntry({
-      harvestDate,
+      harvestDate: harvestDateRef,
       cropName: selectedCrop,
       harvestedAmount,
       harvestedFields: harvestedFieldsRef.current,
@@ -193,7 +195,7 @@ function MainPage() {
 
       <br />
 
-      <SelectCrop harvestedFieldsRef={harvestedFieldsRef} />
+      <SelectCrop {...{harvestedFieldsRef, harvestDate}} />
       {/* {cropIsNotYetSelected ?
         <SelectCrop />
 
