@@ -1,40 +1,28 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom';
-import CropButtons from './CropButtons';
-
-
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import CropButtons from "./CropButtons";
+import { Path_Modify } from "../../routes/AppRouter";
 
 const SelectCrop = ({ harvestDate, harvestedFieldsRef }) => {
   console.log("RENDER SelectCrop");
 
-  // const modifyCropsButton = (
-  //   <button
-  //     onClick={navigateTo(Path_ModifyCrops)}>
-  //     Modify Crops
-  //   </button>
-  // );
+  const navigate = useNavigate();
 
- 
-
+  const modifyCropsButton = (
+    <button onClick={() => navigate(Path_Modify)}>Modify Crops</button>
+  );
 
   return (
-    <div>NewEntry
-
-
+    <div>
+      NewEntry
       {/* <DisplayLatestEntry/> */}
-
       <br />
-
       <p> Please select crop: </p>
-       <CropButtons {...{harvestedFieldsRef, harvestDate}} />
-
+      <CropButtons {...{ harvestedFieldsRef, harvestDate }} />
       <br />
-
-      {/* {modifyCropsButton} */}
-
-
+      {modifyCropsButton}
     </div>
-  )
-}
+  );
+};
 
-export default SelectCrop
+export default SelectCrop;

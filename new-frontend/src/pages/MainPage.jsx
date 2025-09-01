@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { useState } from "react";
 import "../App.css";
 import "../index.css";
-import { getHarvestEntry, postHarvestEntry } from "../service/apiService";
+import { getHarvestRecord, postHarvestRecord } from "../service/apiService";
 import { useNavigate } from "react-router-dom";
 import { getCurrentDate, validateDate } from "../service/utils";
 import DateInputField from "../Components/newHarvestEntry/DateInputField";
@@ -85,10 +85,10 @@ function MainPage() {
   // --------- LAYER 4 -----------------------------------------------------
 
   async function postHarvestEntryAndSetLatestEntry() {
-    const addedEntryId = await postHarvestEntry(harvestEntryObject);
+    const addedEntryId = await postHarvestRecord(harvestEntryObject);
     console.log("addedEntryId", addedEntryId);
 
-    const addedEntry = await getHarvestEntry(addedEntryId);
+    const addedEntry = await getHarvestRecord(addedEntryId);
     setLatestEntry(addedEntry);
     console.log("added Entry", addedEntry);
   }
@@ -195,7 +195,7 @@ function MainPage() {
 
       <br />
 
-      <SelectCrop {...{harvestedFieldsRef, harvestDate}} />
+      <SelectCrop {...{ harvestedFieldsRef, harvestDate }} />
       {/* {cropIsNotYetSelected ?
         <SelectCrop />
 

@@ -76,24 +76,23 @@ export async function getEntriesFilteredBy(dateRange, cropIds = []) {
   // Your backend endpoint is '/api/harvest-record/filtered'
   const endpoint = `harvest-record/filtered?${params.toString()}`;
   return get(endpoint);
-} 
-
-export async function getHarvestEntry(id) {
-  return await get(`harvestEntry/${id}`);
 }
 
+export async function getHarvestRecord(id) {
+  return await get(`harvest-record/${id}`);
+}
 
 export async function getLatestHarvestRecord() {
   return await get("harvest-record/latest");
 }
 
-export async function postHarvestEntry(entry) {
+export async function postHarvestRecord(entry) {
   const response = await post("harvest-record", entry);
   return response.id;
 }
 
 
+
 // You'll also need auth-specific calls
 export const loginUser = (credentials) => post("auth/login", credentials);
 export const registerUser = (userData) => post("auth/register", userData);
-

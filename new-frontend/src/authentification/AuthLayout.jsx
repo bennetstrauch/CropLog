@@ -1,19 +1,19 @@
-import React from 'react';
-import { Outlet, NavLink } from 'react-router-dom';
+import React from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 const AuthLayout = () => {
-  return (
-    <div className="auth-container">
-      {/* Shared navigation for Login and Register */}
-      {/* <nav className="auth-nav">
-        <NavLink to="/login">Login</NavLink>
-        <NavLink to="/register">Register</NavLink>
-      </nav> */}
+  const navigate = useNavigate();
 
-      <main>
-        {/* The Login or Register component will be rendered here */}
+  return (
+    <div>
+      <div className="navbar">
+        <button onClick={() => navigate("/login")}>Login</button>
+        <button onClick={() => navigate("/register")}>Register</button>
+      </div>
+      <br />
+      <div className="turquoiseBorder_Div">
         <Outlet />
-      </main>
+      </div>
     </div>
   );
 };

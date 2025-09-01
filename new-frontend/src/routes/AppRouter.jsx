@@ -5,6 +5,8 @@ import { CropsFieldsProvider } from "../context/CropsFieldsProvider";
 // Layouts
 import AuthLayout from "../authentification/AuthLayout";
 import CheckAuth from "./CheckAuth"; // Your component to protect routes
+import ModifyLayout from "../components/modify/ModifyLayout";
+
 
 // Pages
 import Login from "../authentification/Login";
@@ -13,12 +15,29 @@ import MainPage from "../pages/MainPage";
 import HarvestLog from "../pages/HarvestLog";
 import NotFoundPage from "../pages/NotFoundPage"; // A component for 404 errors
 import FinalizeEntry from "../Components/newHarvestEntry/finalizeEntry";
+import ModifyValues from "../components/modify/ModifyValues";
+
+import CropList from "../components/modify/CropList";
+import FieldList from "../components/modify/FieldList";
+import MeasureUnitList from "../components/modify/AddMeasureUnit";
+import CategoryList from "../components/modify/CategoryList";
+import CropSection from "../components/modify/CropSection";
+import CategoryModPage from "../components/modify/CategoryModPage";
+import MeasureUnitModPage from "../components/modify/MeasureUnitModPage";
 
 // Path Constants
 export const Path_HarvestLog = "/harvest-log";
 export const Path_NewEntry = "/new-entry";
+export const Path_Modify = "/modify";
+
 export const Path_Login = "/login";
 export const Path_Register = "/register";
+
+export const Term_Crops = "crops";
+export const Term_Fields = "fields";
+export const Term_MeasureUnits = "measure-units";
+export const Term_Categories = "categories";
+
 
 function AppRouter() {
   return (
@@ -40,6 +59,15 @@ function AppRouter() {
               path={`${Path_NewEntry}/:cropName`}
               element={<FinalizeEntry />}
             />
+
+            <Route path={Path_Modify} element={<ModifyLayout />}>
+              <Route index element={<CropSection />} /> 
+
+              <Route path={Term_Crops} element={<CropSection />} />
+              <Route path={Term_Fields} element={<FieldList />} />
+              <Route path={Term_MeasureUnits} element={<MeasureUnitModPage />} />
+              <Route path={Term_Categories} element={<CategoryModPage />} />
+            </Route>
           </Route>
         </Route>
 

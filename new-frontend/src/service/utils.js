@@ -28,6 +28,18 @@ export function calculateDateRange(timeframe, offset) {
 }
 
 
+export function formatValueListForDatabase(valuesToAdd) {
+    const valuesToArrayTrimAndCapitalizeFirstLetter = valuesToAdd
+      .split(",")
+      .map((value) => capitalizeFirstLetter(value.trim()));
+
+    return valuesToArrayTrimAndCapitalizeFirstLetter;
+  }
+
+  
+export const capitalizeFirstLetter = (word) =>
+  word.charAt(0).toUpperCase() + word.slice(1);
+
 export function getCurrentDate() {
   const currentDate = new Date().toJSON().slice(0, 10);
   return currentDate;
@@ -57,8 +69,18 @@ export function mapToHTML(listToMap, htmlElement) {
 
 
 
+
+
   export const validateDate = (date) => {
   // Regex to match the pattern YYYY-MM-DD
   const datePattern = /^\d{4}-\d{2}-\d{2}$/;
   return datePattern.test(date);
 };
+
+
+// VALUE
+export const addValue = (value) => (previousValues) =>
+  [...previousValues, value];
+
+export const removeValue = (valueToRemove) => (previousValues) =>
+  previousValues.filter((value) => value !== valueToRemove);

@@ -1,7 +1,6 @@
 // hooks/useHarvestSubmit.js
 
-import { getHarvestEntry, postHarvestEntry } from "../../service/apiService";
-
+import { getHarvestRecord, postHarvestRecord } from "../../service/apiService";
 
 /**
  * Handles submission of a harvest entry.
@@ -9,16 +8,22 @@ import { getHarvestEntry, postHarvestEntry } from "../../service/apiService";
  */
 export default function useHarvestSubmit(setLatestEntry) {
   const submitHarvestEntry = async (entryData) => {
-    const { harvestDate, cropName, harvestedAmount, harvestedFields } = entryData;
+    const { harvestDate, cropName, harvestedAmount, harvestedFields } =
+      entryData;
 
-    if (!cropName || !harvestDate || !harvestedAmount || harvestedFields.length === 0) {
+    if (
+      !cropName ||
+      !harvestDate ||
+      !harvestedAmount ||
+      harvestedFields.length === 0
+    ) {
       alert("Missing required harvest entry data.");
       return null;
     }
 
     try {
-      const addedEntryId = await postHarvestEntry(entryData);
-      const addedEntry = await getHarvestEntry(addedEntryId);
+      const addedEntryId = await postHarvestRecord(entryData);
+      const addedEntry = await getHarvestRecord(addedEntryId);
 
       if (setLatestEntry) {
         setLatestEntry(addedEntry);

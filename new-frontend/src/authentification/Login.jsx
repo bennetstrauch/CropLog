@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess } from "../reduxStore/Slices/AuthSlice";
-import { loginUser, registerUser } from "../service/apiService";
+import { loginUser } from "../service/apiService";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email."),
@@ -17,7 +17,6 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [activeSection, setActiveSection] = useState("login");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -43,24 +42,7 @@ const Login = () => {
     }
   };
 
-  const handleRegister = async () => {
-    setError("");
-    const validation = loginSchema.safeParse({ email, password });
-    if (!validation.success) {
-      setError(validation.error.errors[0].message);
-      return;
-    }
-
-    try {
-      await registerUser({ email, password });
-      alert("Registration successful!");
-      setActiveSection("login");
-    } catch (err) {
-      setError("Failed to register. Try again.");
-    }
-  };
-
-  const renderInput = () => (
+  return (
     <div>
       <input
         type="email"
@@ -75,37 +57,9 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Password"
       />
-    </div>
-  );
-
-  const renderNavBar = () => (
-    <div className="navbar">
-      <button onClick={() => setActiveSection("login")}>Login</button>
-      <button onClick={() => setActiveSection("register")}>Register</button>
-    </div>
-  );
-
-  return (
-    <div>
-      {renderNavBar()}
       <br />
-      <div className="turquoiseBorder_Div">
-        {activeSection === "login" && (
-          <div>
-            {renderInput()}
-            <br />
-            <button onClick={handleLogin}>Login</button>
-          </div>
-        )}
-        {activeSection === "register" && (
-          <div>
-            {renderInput()}
-            <br />
-            <button onClick={handleRegister}>Register</button>
-          </div>
-        )}
-        {error && <p style={{ color: "red" }}>{error}</p>}
-      </div>
+      <button onClick={handleLogin}>Login</button>
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 };

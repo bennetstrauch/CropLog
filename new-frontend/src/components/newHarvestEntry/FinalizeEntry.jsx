@@ -4,7 +4,7 @@ import QuantityInput from "./QuantityInput";
 import SelectFields from "../harvestFields/SelectFields";
 import { getCurrentDate } from "../../service/utils";
 import { CropsFieldsContext } from "../../context/CropsFieldsProvider";
-import { post, postHarvestEntry } from "../../service/apiService";
+import { post, postHarvestRecord } from "../../service/apiService";
 import GoBackButton from "../universal/GoBackButton";
 
 const FinalizeEntry = () => {
@@ -20,7 +20,12 @@ const FinalizeEntry = () => {
   // ✅ Destructure BOTH pieces of data from the location state
   const { harvestDate, harvestedCrop, harvestedFieldsRef } = state;
 
-  console.log("RENDER FinalizeEntry,   harvestedCrop", harvestedCrop, "harvestedFields", harvestedFieldsRef);
+  console.log(
+    "RENDER FinalizeEntry,   harvestedCrop",
+    harvestedCrop,
+    "harvestedFields",
+    harvestedFieldsRef
+  );
 
   const harvestedQuantity = useRef(0.0);
   // # leave in context or define here?
@@ -29,7 +34,6 @@ const FinalizeEntry = () => {
   const goBack = () => {
     navigate(-1);
   };
-
 
   // ## global variables for backend and frontend? harvestDate, cropId, etc...
   function prepareEntry() {
@@ -54,10 +58,9 @@ const FinalizeEntry = () => {
   const handleEntrySubmission = () => {
     const newEntry = prepareEntry();
     console.log("Submitting new entry:", newEntry);
-    const addedEntryId = postHarvestEntry(newEntry);
+    const addedEntryId = postHarvestRecord(newEntry);
     // getLatestEntry(addedEntryId);
 
-    
     goBack();
   };
 
