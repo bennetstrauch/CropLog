@@ -24,6 +24,8 @@ import CategoryList from "../components/modify/CategoryList";
 import CropSection from "../components/modify/CropSection";
 import CategoryModPage from "../components/modify/CategoryModPage";
 import MeasureUnitModPage from "../components/modify/MeasureUnitModPage";
+import { CategoriesProvider } from "../context/CategoriesProvider";
+import AppProviders from "../context/AppProviders";
 
 // Path Constants
 export const Path_HarvestLog = "/harvest-log";
@@ -51,23 +53,19 @@ function AppRouter() {
 
         {/* 2. Protected routes that require a logged-in user */}
         <Route element={<CheckAuth />}>
-          <Route element={<CropsFieldsProvider />}>
-            <Route path="/" element={<MainPage />} />
-            <Route path={Path_NewEntry} element={<MainPage />} />
-            <Route path={Path_HarvestLog} element={<HarvestLog />} />
-            <Route
-              path={`${Path_NewEntry}/:cropName`}
-              element={<FinalizeEntry />}
-            />
+            <Route element={<AppProviders />}>
+              <Route path="/" element={<MainPage />} />
+              <Route path={Path_NewEntry} element={<MainPage />} />
+              <Route path={Path_HarvestLog} element={<HarvestLog />} />
+              <Route path={`${Path_NewEntry}/:cropName`} element={<FinalizeEntry />} />
 
-            <Route path={Path_Modify} element={<ModifyLayout />}>
-              <Route index element={<CropSection />} /> 
-
-              <Route path={Term_Crops} element={<CropSection />} />
-              <Route path={Term_Fields} element={<FieldList />} />
-              <Route path={Term_MeasureUnits} element={<MeasureUnitModPage />} />
-              <Route path={Term_Categories} element={<CategoryModPage />} />
-            </Route>
+              <Route path={Path_Modify} element={<ModifyLayout />}>
+                <Route index element={<CropSection />} /> 
+                <Route path={Term_Crops} element={<CropSection />} />
+                <Route path={Term_Fields} element={<FieldList />} />
+                <Route path={Term_MeasureUnits} element={<MeasureUnitModPage />} />
+                <Route path={Term_Categories} element={<CategoryModPage />} />
+              </Route>
           </Route>
         </Route>
 

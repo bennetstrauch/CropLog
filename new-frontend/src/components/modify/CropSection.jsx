@@ -3,9 +3,11 @@ import CropForm from "./CropForm";
 import CropList from "./CropList";
 import { getCrops, addCropsWithUnit, deleteCrops, updateCrop, getMeasureUnits } from "../../service/modifyService";
 import { CropsFieldsContext, CropsFieldsProvider, ProvideCropsAndFieldsContext } from "../../context/CropsFieldsProvider";
+import { useCategories } from "../../context/CategoriesProvider";
 
 const CropSection = () => {
   const {crops, setCrops, measureUnits, setMeasureUnits} = ProvideCropsAndFieldsContext()
+   const { categories } = useCategories();
   // // Load crops + supporting data
   // useEffect(() => {
   //   async function fetchData() {
@@ -25,7 +27,7 @@ const CropSection = () => {
   //   fetchData();
   // }, []);
 
-  const [categories, setCategories] = useState([])
+  
 
   console.log("measureUnits:" ,measureUnits)
 

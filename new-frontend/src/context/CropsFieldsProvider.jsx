@@ -1,96 +1,108 @@
-import { Outlet } from "react-router-dom";
-// Use the refactored service
-import { get, getLatestHarvestRecord } from "../service/apiService";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getCrops, getFields, getMeasureUnits } from "../service/modifyService";
+import { Outlet } from "react-router-dom";
 
-export const CropsFieldsContext = createContext();
+export const CropsFieldsContext = createContext(null);
 
+/**
+ * CropsFieldsProvider
+ *
+ * - Fetches crops, fields and measure units on mount
+ * - Exposes: { crops, setCrops, fields, setFields, measureUnits, setMeasureUnits,
+ *               cropsMap, fieldsMap, measureUnitsMap, loading, reload }
+ *
+ * NOTE: This provider does NOT short-circuit rendering while loading.
+ * Consumers can use `loading` to show spinners if desired.
+ */
 export const CropsFieldsProvider = ({ children }) => {
-  // Pass children through
-  console.log("RENDER CropsFieldsProvider");
+  const [loading, setLoading] = useState(true);
 
-  const [loading, setLoading] = useState(true); //# Add a loading state
-
-  // const [latestEntry, setLatestEntry] = useState(null);
   const [crops, setCrops] = useState([]);
   const [fields, setFields] = useState([]);
   const [measureUnits, setMeasureUnits] = useState([]);
 
-
-  const cropsMap = useMemo(
-    () => Object.fromEntries(crops.map((c) => [c.id, c])),
-    [crops]
-  );
-  const fieldsMap = useMemo(
-    () => Object.fromEntries(fields.map((f) => [f.id, f])),
-    [fields]
-  );
-
+  // Derived maps memoized
+  const cropsMap = useMemo(() => Object.fromEntries((crops || []).map((c) => [c.id, c])), [crops]);
+  const fieldsMap = useMemo(() => Object.fromEntries((fields || []).map((f) => [f.id, f])), [fields]);
   const measureUnitsMap = useMemo(
-    () => Object.fromEntries(measureUnits.map((m) => [m.id, m])),
+    () => Object.fromEntries((measureUnits || []).map((m) => [m.id, m])),
     [measureUnits]
-  )
+  );
 
-  // const fetchLatestEntry = async () => {
-  //   try {
-  //     const latest = await getLatestHarvestRecord();
-  //     setLatestEntry(latest);
-  //   } catch (error) {
-  //     if (error.response?.status === 404) {
-  //       console.warn("No latest entry found.");
-  //       setLatestEntry(null);
-  //     } else {
-  //       console.error("Error fetching latest entry:", error);
-  //     }
-  //   }
-  // };
-
-  // ## field and crop ids are fetched, how to map from this to the actual names / objects for the harvest log?
-
+  // Fetch on mount
   useEffect(() => {
-    console.log("Fetching initial data.")
-
+    let mounted = true;
     const fetchData = async () => {
+      setLoading(true);
       try {
-        // Parallel fetching is more efficient!
         const [cropsData, fieldsData, measureUnitsData] = await Promise.all([
           getCrops(),
           getFields(),
-          getMeasureUnits()
+          getMeasureUnits(),
         ]);
-
-        setCrops(cropsData);
-        setFields(fieldsData);
-        setMeasureUnits(measureUnitsData)
-          console.log("fetched measureUnits: ", measureUnits)
-          console.log("fetched crops: ", cropsData)
-
-
-        // await fetchLatestEntry();
-      } catch (error) {
-        console.error("Failed to fetch initial data:", error);
-        // Handle error, e.g., redirect to login if unauthorized
+        if (!mounted) return;
+        setCrops(Array.isArray(cropsData) ? cropsData : []);
+        setFields(Array.isArray(fieldsData) ? fieldsData : []);
+        setMeasureUnits(Array.isArray(measureUnitsData) ? measureUnitsData : []);
+        // Log the fetched raw payloads (not state)
+        console.log("Crops fetched:", cropsData);
+        console.log("Fields fetched:", fieldsData);
+        console.log("Measure units fetched:", measureUnitsData);
+      } catch (err) {
+        console.error("Failed to fetch crops/fields/measureUnits:", err);
+        if (!mounted) return;
+        setCrops([]);
+        setFields([]);
+        setMeasureUnits([]);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
     fetchData();
-  }, []); // Empty dependency array ensures this runs only once on mount
+    return () => {
+      mounted = false;
+    };
+  }, []); // run once
 
-  if (loading) {
-    return <div>Loading...</div>; // Show a loading indicator
-  }
+  const reload = async () => {
+    setLoading(true);
+    try {
+      const [cropsData, fieldsData, measureUnitsData] = await Promise.all([
+        getCrops(),
+        getFields(),
+        getMeasureUnits(),
+      ]);
+      setCrops(Array.isArray(cropsData) ? cropsData : []);
+      setFields(Array.isArray(fieldsData) ? fieldsData : []);
+      setMeasureUnits(Array.isArray(measureUnitsData) ? measureUnitsData : []);
+    } catch (err) {
+      console.error("Failed to reload data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const contextValue = { crops, fields, cropsMap, fieldsMap, measureUnits, setCrops, setMeasureUnits, measureUnitsMap };
-
-  return (
-    <CropsFieldsContext.Provider value={contextValue}>
-      <Outlet />
-    </CropsFieldsContext.Provider>
+  // Memoize provider value to avoid unnecessary consumer re-renders
+  const value = useMemo(
+    () => ({
+      crops,
+      setCrops,
+      fields,
+      setFields,
+      measureUnits,
+      setMeasureUnits,
+      cropsMap,
+      fieldsMap,
+      measureUnitsMap,
+      loading,
+      reload,
+    }),
+    [crops, fields, measureUnits, cropsMap, fieldsMap, measureUnitsMap, loading]
   );
+
+  return <CropsFieldsContext.Provider value={value}>{children ?? <Outlet />}</CropsFieldsContext.Provider>;
 };
 
-export const ProvideCropsAndFieldsContext = () =>
-  useContext(CropsFieldsContext);
+// Hook for consumers
+export const ProvideCropsAndFieldsContext = () => useContext(CropsFieldsContext);

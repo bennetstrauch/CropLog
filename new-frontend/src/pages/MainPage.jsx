@@ -19,6 +19,7 @@ import useHarvestSubmit from "../components/newHarvestEntry/useHarvestSubmit";
 //# warning --> each child should have unique key (fixit)
 
 function MainPage() {
+  console.log("MainPage rendered");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

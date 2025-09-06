@@ -62,8 +62,8 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
                   }
                 >
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
                     </option>
                   ))}
                   <option value="">+ Add New...</option>
