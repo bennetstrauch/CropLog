@@ -3,8 +3,8 @@ import axios from "axios";
 
 // Create an Axios instance
 const API = axios.create({
-  // baseURL: 'http://localhost:8080/api/',
-  baseURL: "https://harvest-log.onrender.com/api/",
+  baseURL: 'http://localhost:8080/api/',
+  // baseURL: "https://harvest-log.onrender.com/api/",
 });
 
 // Use an interceptor to add the auth token to every request
@@ -16,6 +16,8 @@ API.interceptors.request.use(
     if (token) {
       // Add the token to the Authorization header
       config.headers.Authorization = `Bearer ${token}`;
+
+      console.log("Token exists: ", token)
     }
 
     return config;
@@ -34,7 +36,7 @@ export const get = async (endpoint) => {
     console.log("Fetched data:", response.data);
     return response.data;
   } catch (error) {
-    console.error("GET request error:", error.message);
+    console.error("GET request error with endpoint: ", endpoint, "|", error.message);
     // Return a consistent error response or re-throw the error
     throw error;
   }
@@ -46,7 +48,7 @@ export const post = async (endpoint, data) => {
     console.log("Response from POST:", response);
     return response.data;
   } catch (error) {
-    console.error("POST request error:", error.message);
+    console.error("POST request error with endpoint: ", endpoint, "|", error.message);
     throw error;
   }
 };

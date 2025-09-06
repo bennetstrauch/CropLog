@@ -47,8 +47,8 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
                   }
                 >
                   {measureUnits.map((unit) => (
-                    <option key={unit} value={unit}>
-                      {unit}
+                    <option key={unit.id} value={unit.name}>
+                      {unit.name}
                     </option>
                   ))}
                   <option value="">+ Add New...</option>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const CropForm = ({ measureUnits, onAdd }) => {
   const [cropsInput, setCropsInput] = useState("");
@@ -28,8 +28,8 @@ const CropForm = ({ measureUnits, onAdd }) => {
       >
         <option value="">Select unit</option>
         {measureUnits.map((unit) => (
-          <option key={unit} value={unit}>
-            {unit}
+          <option key={unit.id} value={unit.name}>
+            {unit.name}
           </option>
         ))}
       </select>

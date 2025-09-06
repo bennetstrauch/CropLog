@@ -1,29 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import CropForm from "./CropForm";
 import CropList from "./CropList";
 import { getCrops, addCropsWithUnit, deleteCrops, updateCrop, getMeasureUnits } from "../../service/modifyService";
+import { CropsFieldsContext, CropsFieldsProvider, ProvideCropsAndFieldsContext } from "../../context/CropsFieldsProvider";
 
 const CropSection = () => {
-  const [crops, setCrops] = useState([]);
-  const [measureUnits, setMeasureUnits] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const {crops, setCrops, measureUnits, setMeasureUnits} = ProvideCropsAndFieldsContext()
+  // // Load crops + supporting data
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     const [cropData, muData, catData] = await Promise.all([
+  //       getCrops(),
+  //       // assume you have service funcs
+  //       // or replace with [] if not ready
+  //       getMeasureUnits(),
+  //       getCategories(),
+  //     ]);
+  //     setCrops(cropData);
+  //     setMeasureUnits(muData);
+  //     setCategories(catData);
 
-  // Load crops + supporting data
-  useEffect(() => {
-    async function fetchData() {
-      const [cropData, muData, catData] = await Promise.all([
-        getCrops(),
-        // assume you have service funcs
-        // or replace with [] if not ready
-        getMeasureUnits(),
-        getCategories(),
-      ]);
-      setCrops(cropData);
-      setMeasureUnits(muData);
-      setCategories(catData);
-    }
-    fetchData();
-  }, []);
+  //     console.log("MeasureUNits: ", measureUnits)
+  //   }
+  //   fetchData();
+  // }, []);
+
+  const [categories, setCategories] = useState([])
+
+  console.log("measureUnits:" ,measureUnits)
 
   const handleAddCrops = async (cropsToAdd, measureUnit) => {
     try {
@@ -57,6 +61,7 @@ const CropSection = () => {
   return (
     <div>
       <CropForm measureUnits={measureUnits} onAdd={handleAddCrops} />
+    
       <CropList
         crops={crops}
         measureUnits={measureUnits}

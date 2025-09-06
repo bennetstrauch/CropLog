@@ -7,6 +7,7 @@ const AddMeasureUnit = ({ onAdded }) => {
   const [error, setError] = useState("");
 
   const handleAdd = async () => {
+
     setError("");
     if (!name.trim()) {
       setError("Name is required.");
@@ -14,10 +15,11 @@ const AddMeasureUnit = ({ onAdded }) => {
     }
 
     try {
-      const newUnit = await createMeasureUnit({
+      const unitToPost = {
         name: name.trim(),
         abbreviation: abbreviation.trim(),
-      });
+      }
+      const newUnit = await createMeasureUnit(unitToPost);
       onAdded(newUnit); // notify parent
       setName("");
       setAbbreviation("");

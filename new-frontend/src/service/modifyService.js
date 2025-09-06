@@ -1,6 +1,56 @@
-// modifyService.js
-
 import { get, post } from "./apiService";
+
+
+// return array of measure unit objects or strings depending on backend
+export const getMeasureUnits = () => get("measure-units");
+export const createMeasureUnit = (data) => post("measure-units", data);
+
+// crops
+export const getCrops = () => get("crops");
+export const createCropsBatch = (cropList) => post("crops/batch", cropList);
+
+
+// ##clean
+export async function addCropsWithUnit(cropNames, measureUnitName) {
+  if (!measureUnitName) throw new Error("Measure unit is required.");
+  // fetch existing units (assume each unit has { id, name })
+  const existing = await getMeasureUnits();
+  const found = existing.find(u => (u.name ?? u) === measureUnitName);
+  let measureUnitId;
+  if (found) {
+    measureUnitId = found.id ?? null;
+  } else {
+    const createdMU = await createMeasureUnit({ name: measureUnitName });
+    measureUnitId = createdMU.id ?? null;
+  }
+  if (!measureUnitId) {
+    // fallback: if your backend accepts measureUnitName, you could send name instead
+    throw new Error("Could not resolve measure unit id.");
+  }
+
+  const payload = cropNames.map(name => ({ name, measureUnitId }));
+  console.log("payload for adding crops: ", payload)
+  const createdCrops = await createCropsBatch(payload);
+  return createdCrops; // array of CropResponse (should include categoryName per crop)
+}
+
+
+// update single crop (PUT)
+export const updateCrop = async (id, updates) => {
+  // updates is an object like { name, measureUnitName, categoryName }
+  return post(`crops/${id}`, updates); // if your backend expects PUT, swap to API.put
+};
+
+// delete many crops (backend might expose bulk delete or only single deletes)
+export const deleteCrops = async (ids) => {
+  // If backend supports bulk delete endpoint, use that.
+  // Fallback: call single delete per id
+  await Promise.all(ids.map(id => post(`crops/${id}/delete`, {}))); // adjust if your delete route is different
+};
+
+
+
+
 
 // Helper to ensure measure unit exists
 async function ensureMeasureUnitExists(name) {
@@ -16,38 +66,10 @@ export async function addGenericValues(valuesToAdd, type) {  }
 export async function deleteValues(valuesToDelete) {  }
 
 
-// Add multiple crops with the given measure unit
-export async function addCropsWithUnit(cropNames, measureUnitName) {
-  if (!measureUnitName) {
-    throw new Error("Measure unit is required.");
-  }
 
-  // modifyService.js
-
-  // Step 1: Ensure the unit exists
-  await ensureMeasureUnitExists(measureUnitName);
-
-  // Step 2: Prepare the batch payload
-  const cropRequests = cropNames.map(name => ({
-    name,
-    measureUnitName,
-  }));
-
-  // Step 3: Submit batch to backend
-  await createCropsBatch(cropRequests);
-}
-
-export const updateCrop = async (id, updates) => { /* PATCH /crops/:id */ };
-export const deleteCrops = async (ids) => { /* POST or DELETE with array */ };
-
-
-export const getCrops = () => get("crops");
 export const createCrop = (data) => post("crops", data);
-export const createCropsBatch = (cropList) => post("crops/batch", cropList);
 export const deleteCrop = (id) => API.delete(`crops/${id}`);
 
-export const getMeasureUnits = () => get("measure-units");
-export const createMeasureUnit = (data) => post("measure-units", data);
 export const deleteMeasureUnit = (id) => API.delete(`measure-units/${id}`);
 
 export const getFields = () => get("fields");
