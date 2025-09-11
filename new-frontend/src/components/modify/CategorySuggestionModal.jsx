@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createCategories, updateCrop, updateCropCategory } from "../../service/modifyService";
+import { createCategories, updateCrop } from "../../service/modifyService";
 
 const CategorySuggestionModal = ({ crops, categories, onClose, onCropsUpdated }) => {
   const [cropSelections, setCropSelections] = useState(() =>

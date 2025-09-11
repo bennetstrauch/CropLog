@@ -24,9 +24,14 @@ const CropSection = () => {
     try {
       const newCrops = await addCropsWithUnit(cropsToAdd, measureUnit);
 
+      console.log("New crops returned:", newCrops);
+
+
+
       // separate crops that still need category resolution
       const unresolved = newCrops.filter((c) => !c.categoryResolved);
       const resolved = newCrops.filter((c) => c.categoryResolved);
+console.log("Unresolved crops:", unresolved);
 
       if (resolved.length > 0) {
         setCrops((prev) => [...prev, ...resolved]);
