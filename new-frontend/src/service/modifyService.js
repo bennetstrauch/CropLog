@@ -1,4 +1,4 @@
-import { get, post } from "./apiService";
+import { get, post, put } from "./apiService";
 
 
 // return array of measure unit objects or strings depending on backend

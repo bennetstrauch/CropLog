@@ -53,6 +53,17 @@ export const post = async (endpoint, data) => {
   }
 };
 
+export const put = async (endpoint, data) => {
+  try {
+    const response = await API.put(endpoint, data);
+    console.log("Response from PUT:", response);
+    return response.data;
+  } catch (error) {
+    console.error("PUT request error with endpoint:", endpoint, "|", error.message);
+    throw error;
+  }
+};
+
 // --- App-Specific API Calls ---
 
 /**
