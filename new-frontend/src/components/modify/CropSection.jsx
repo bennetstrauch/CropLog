@@ -1,40 +1,41 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import CropForm from "./CropForm";
 import CropList from "./CropList";
-import { getCrops, addCropsWithUnit, deleteCrops, updateCrop, getMeasureUnits } from "../../service/modifyService";
-import { CropsFieldsContext, CropsFieldsProvider, ProvideCropsAndFieldsContext } from "../../context/CropsFieldsProvider";
+import CategorySuggestionModal from "./CategorySuggestionModal";
+import {
+  getCrops,
+  addCropsWithUnit,
+  deleteCrops,
+  updateCrop,
+  getMeasureUnits,
+} from "../../service/modifyService";
+import { ProvideCropsAndFieldsContext } from "../../context/CropsFieldsProvider";
 import { useCategories } from "../../context/CategoriesProvider";
 
 const CropSection = () => {
-  const {crops, setCrops, measureUnits, setMeasureUnits} = ProvideCropsAndFieldsContext()
-   const { categories } = useCategories();
-  // // Load crops + supporting data
-  // useEffect(() => {
-  //   async function fetchData() {
-  //     const [cropData, muData, catData] = await Promise.all([
-  //       getCrops(),
-  //       // assume you have service funcs
-  //       // or replace with [] if not ready
-  //       getMeasureUnits(),
-  //       getCategories(),
-  //     ]);
-  //     setCrops(cropData);
-  //     setMeasureUnits(muData);
-  //     setCategories(catData);
+  const { crops, setCrops, measureUnits, setMeasureUnits } =
+    ProvideCropsAndFieldsContext();
+  const { categories } = useCategories();
 
-  //     console.log("MeasureUNits: ", measureUnits)
-  //   }
-  //   fetchData();
-  // }, []);
-
-  
-
-  console.log("measureUnits:" ,measureUnits)
+  const [pendingCrops, setPendingCrops] = useState([]); // holds crops that need category resolution
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleAddCrops = async (cropsToAdd, measureUnit) => {
     try {
       const newCrops = await addCropsWithUnit(cropsToAdd, measureUnit);
-      setCrops((prev) => [...prev, ...newCrops]);
+
+      // separate crops that still need category resolution
+      const unresolved = newCrops.filter((c) => !c.categoryResolved);
+      const resolved = newCrops.filter((c) => c.categoryResolved);
+
+      if (resolved.length > 0) {
+        setCrops((prev) => [...prev, ...resolved]);
+      }
+
+      if (unresolved.length > 0) {
+        setPendingCrops(unresolved);
+        setModalOpen(true);
+      }
     } catch {
       alert("Failed to add crops.");
     }
@@ -60,10 +61,25 @@ const CropSection = () => {
     }
   };
 
+  const handleModalClose = () => {
+    setPendingCrops([]);
+    setModalOpen(false);
+  };
+
+  const handleModalCropsUpdated = async () => {
+    // Re-fetch crops so we get fresh state after user confirmed categories
+    try {
+      const refreshed = await getCrops();
+      setCrops(refreshed);
+    } catch {
+      console.warn("Failed to refresh crops after category suggestion save.");
+    }
+  };
+
   return (
     <div>
       <CropForm measureUnits={measureUnits} onAdd={handleAddCrops} />
-    
+
       <CropList
         crops={crops}
         measureUnits={measureUnits}
@@ -71,6 +87,15 @@ const CropSection = () => {
         onUpdateCrop={handleUpdateCrop}
         onDeleteSelected={handleDeleteCrops}
       />
+
+      {modalOpen && pendingCrops.length > 0 && (
+        <CategorySuggestionModal
+          crops={pendingCrops}
+          categories={categories}
+          onClose={handleModalClose}
+          onCropsUpdated={handleModalCropsUpdated}
+        />
+      )}
     </div>
   );
 };

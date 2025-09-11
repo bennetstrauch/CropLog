@@ -39,36 +39,40 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
             <tr key={crop.id}>
               <td>{index + 1}</td>
               <td>{crop.name}</td>
+              {/* --- Measure Unit Select --- */}
               <td>
                 <select
-                  value={crop.measureUnit}
+                  value={crop.measureUnitId ?? ""}
                   onChange={(e) =>
-                    handleChange(crop.id, "measureUnit", e.target.value)
+                    handleChange(crop.id, "measureUnitId", Number(e.target.value) || null)
                   }
                 >
+                  <option value="">-- Select Measure Unit --</option>
                   {measureUnits.map((unit) => (
-                    <option key={unit.id} value={unit.name}>
+                    <option key={unit.id} value={unit.id}>
                       {unit.name}
                     </option>
                   ))}
-                  <option value="">+ Add New...</option>
                 </select>
               </td>
+
+              {/* --- Category Select --- */}
               <td>
                 <select
-                  value={crop.category || ""}
+                  value={crop.categoryId ?? ""}
                   onChange={(e) =>
-                    handleChange(crop.id, "category", e.target.value)
+                    handleChange(crop.id, "categoryId", Number(e.target.value) || null)
                   }
                 >
+                  <option value="">-- No Category --</option>
                   {categories.map((cat) => (
-                    <option key={cat.id} value={cat.name}>
+                    <option key={cat.id} value={cat.id}>
                       {cat.name}
                     </option>
                   ))}
-                  <option value="">+ Add New...</option>
                 </select>
               </td>
+
               <td>
                 <input
                   type="checkbox"

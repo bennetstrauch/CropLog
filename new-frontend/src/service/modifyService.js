@@ -38,14 +38,14 @@ export async function addCropsWithUnit(cropNames, measureUnitName) {
 // update single crop (PUT)
 export const updateCrop = async (id, updates) => {
   // updates is an object like { name, measureUnitName, categoryName }
-  return post(`crops/${id}`, updates); // if your backend expects PUT, swap to API.put
+  return put(`crops/${id}`, updates); // if your backend expects PUT, swap to API.put
 };
 
 // delete many crops (backend might expose bulk delete or only single deletes)
 export const deleteCrops = async (ids) => {
-  // If backend supports bulk delete endpoint, use that.
+  // If backend supports bulk delete endpoint, use that. ###
   // Fallback: call single delete per id
-  await Promise.all(ids.map(id => post(`crops/${id}/delete`, {}))); // adjust if your delete route is different
+  await Promise.all(ids.map(id => delete(`crops/${id}/delete`, {}))); // adjust if your delete route is different
 };
 
 
@@ -80,4 +80,12 @@ export const deleteField = (id) => API.delete(`fields/${id}`);
 export const getCategories = () => get("categories");
 export const createCategory = (data) => post("categories", data);
 export const deleteCategory = (id) => API.delete(`categories/${id}`);
+export const createCategories = async (categories) => {
+  if (!Array.isArray(categories)) {
+    throw new Error("createCategories expects an array of category names");
+  }
 
+  const response = await axios.post("/api/categories/batch", categories);
+  return response.data; // should be an array of CategoryResponse {id, name}
+};
+// #####implement in BACKEND !!!!!!!!
