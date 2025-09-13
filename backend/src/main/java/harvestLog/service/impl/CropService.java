@@ -180,15 +180,28 @@ public class CropService implements ICropService {
         return cropRepo.findById(id)
                 .filter(c -> c.getFarmer().getId().equals(farmerId))
                 .map(c -> {
-                    c.setName(request.name());
+                    // Only update fields that are provided (not null)
+                    if (request.name() != null) {
+                        c.setName(request.name());
+                    }
+
+                    if (request.measureUnitId() != null) {
+                        MeasureUnit mu = measureUnitRepo.findById(request.measureUnitId())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                        "Measure unit not found: " + request.measureUnitId()));
+                        c.setMeasureUnit(mu);
+                    }
+
                     if (request.categoryId() != null) {
                         Category cat = categoryRepo.findById(request.categoryId())
                                 .orElseThrow(() -> new IllegalArgumentException(
                                         "Category not found: " + request.categoryId()));
                         c.setCategory(cat);
-                    } else {
+                    } else if (request.categoryId() == null && request.name() != null) {
+                        // Only clear category if this is a complete update (name provided)
                         c.setCategory(null);
                     }
+
                     return toResponse(cropRepo.save(c));
                 });
     }
@@ -203,6 +216,18 @@ public class CropService implements ICropService {
                     return true;
                 })
                 .orElse(false);
+    }
+
+    @Override
+    @Transactional
+    public int deleteBatch(List<Long> ids, Long farmerId) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+
+        // Use a single query to find and delete crops belonging to the farmer
+        int deletedCount = cropRepo.deleteByIdInAndFarmerId(ids, farmerId);
+        return deletedCount;
     }
 
     // ===== Mapping helpers =====

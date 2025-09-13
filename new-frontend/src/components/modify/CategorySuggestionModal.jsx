@@ -135,6 +135,7 @@ const CategorySuggestionModal = ({ crops, categories, onClose, onCropsUpdated })
       ];
 
       let newCategories = [];
+      console.log("New categories to create:", newCategoryNames);
       if (newCategoryNames.length > 0) {
         newCategories = await createCategories(newCategoryNames);
       }

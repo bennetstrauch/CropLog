@@ -48,7 +48,20 @@ console.log("Unresolved crops:", unresolved);
 
   const handleUpdateCrop = async (id, field, value) => {
     try {
-      const updatedCrop = await updateCrop(id, { [field]: value });
+      // Find the current crop to get all existing values
+      const currentCrop = crops.find(c => c.id === id);
+      if (!currentCrop) {
+        throw new Error("Crop not found");
+      }
+
+      // Create complete request with updated field
+      const completeRequest = {
+        name: currentCrop.name,
+        measureUnitId: field === 'measureUnitId' ? value : currentCrop.measureUnitId,
+        categoryId: field === 'categoryId' ? value : currentCrop.categoryId
+      };
+
+      const updatedCrop = await updateCrop(id, completeRequest);
       setCrops((prev) =>
         prev.map((c) => (c.id === id ? { ...c, ...updatedCrop } : c))
       );

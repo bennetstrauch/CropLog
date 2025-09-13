@@ -16,8 +16,6 @@ API.interceptors.request.use(
     if (token) {
       // Add the token to the Authorization header
       config.headers.Authorization = `Bearer ${token}`;
-
-      console.log("Token exists: ", token)
     }
 
     return config;
@@ -60,6 +58,17 @@ export const put = async (endpoint, data) => {
     return response.data;
   } catch (error) {
     console.error("PUT request error with endpoint:", endpoint, "|", error.message);
+    throw error;
+  }
+};
+
+export const deleteRequest = async (endpoint, data) => {
+  try {
+    const response = await API.delete(endpoint, { data });
+    console.log("Response from DELETE:", response);
+    return response.data;
+  } catch (error) {
+    console.error("DELETE request error with endpoint:", endpoint, "|", error.message);
     throw error;
   }
 };

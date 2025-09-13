@@ -1,4 +1,4 @@
-import { get, post, put } from "./apiService";
+import { get, post, put, deleteRequest } from "./apiService";
 
 
 // return array of measure unit objects or strings depending on backend
@@ -41,11 +41,9 @@ export const updateCrop = async (id, updates) => {
   return put(`crops/${id}`, updates); // if your backend expects PUT, swap to API.put
 };
 
-// delete many crops (backend might expose bulk delete or only single deletes)
+// delete many crops using batch delete endpoint
 export const deleteCrops = async (ids) => {
-  // If backend supports bulk delete endpoint, use that. ###
-  // Fallback: call single delete per id
-  await Promise.all(ids.map(id => delete(`crops/${id}/delete`, {}))); // adjust if your delete route is different
+  return deleteRequest("crops/batch", ids);
 };
 
 
@@ -85,7 +83,7 @@ export const createCategories = async (categories) => {
     throw new Error("createCategories expects an array of category names");
   }
 
+console.log("Creating categories:", categories);
   const response = await axios.post("/api/categories/batch", categories);
   return response.data; // should be an array of CategoryResponse {id, name}
 };
-// #####implement in BACKEND !!!!!!!!
