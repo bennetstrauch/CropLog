@@ -16,7 +16,17 @@ export default function useHarvestForm() {
     harvestedFieldsRef.current = [];
   };
 
-  console.log("useHarvestForm - harvestedFields:", harvestedFieldsRef);
+  const resetHarvestDate = () => setHarvestDate(getCurrentDate());
+  const resetCropSelection = () => setSelectedCrop("");
+  const resetHarvestedAmount = () => setHarvestedAmount(0);
+  const resetHarvestedFields = () => {
+    harvestedFieldsRef.current = [];
+  };
+
+  const setHarvestedFields = (fields) => {
+    harvestedFieldsRef.current = fields;
+  };
+
   return {
     harvestDate,
     setHarvestDate,
@@ -25,6 +35,11 @@ export default function useHarvestForm() {
     harvestedAmount,
     setHarvestedAmount,
     harvestedFieldsRef,
+    setHarvestedFields,
     resetForm,
+    resetHarvestDate,
+    resetCropSelection,
+    resetHarvestedAmount,
+    resetHarvestedFields,
   };
 }

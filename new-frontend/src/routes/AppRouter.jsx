@@ -12,6 +12,7 @@ import ModifyLayout from "../components/modify/ModifyLayout";
 import Login from "../authentification/Login";
 import Register from "../authentification/Register";
 import MainPage from "../pages/MainPage";
+import MainPageRefactored from "../pages/MainPageRefactored";
 import HarvestLog from "../pages/HarvestLog";
 import NotFoundPage from "../pages/NotFoundPage"; // A component for 404 errors
 import FinalizeEntry from "../Components/newHarvestEntry/finalizeEntry";
@@ -54,8 +55,8 @@ function AppRouter() {
         {/* 2. Protected routes that require a logged-in user */}
         <Route element={<CheckAuth />}>
             <Route element={<AppProviders />}>
-              <Route path="/" element={<MainPage />} />
-              <Route path={Path_NewEntry} element={<MainPage />} />
+              <Route path="/" element={<MainPageRefactored />} />
+              <Route path={Path_NewEntry} element={<MainPageRefactored />} />
               <Route path={Path_HarvestLog} element={<HarvestLog />} />
               <Route path={`${Path_NewEntry}/:cropName`} element={<FinalizeEntry />} />
 
