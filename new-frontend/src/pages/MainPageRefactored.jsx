@@ -3,7 +3,6 @@ import "../App.css";
 import "../index.css";
 import { validateDate } from "../service/utils";
 import SelectCrop from "../Components/newHarvestEntry/SelectCrop";
-import { ProvideCropsAndFieldsContext } from "../context/CropsFieldsProvider";
 import useHarvestForm from "../components/newHarvestEntry/useHarvestForm";
 import useHarvestSubmit from "../components/newHarvestEntry/useHarvestSubmit";
 import useUIVisibility from "../components/newHarvestEntry/useUIVisibility";
@@ -24,8 +23,7 @@ function MainPage() {
     resetHarvestedAmount,
   } = useHarvestForm();
 
-  const { setLatestEntry } = ProvideCropsAndFieldsContext();
-  const { submitHarvestEntry } = useHarvestSubmit(setLatestEntry);
+  const { submitHarvestEntry } = useHarvestSubmit();
 
   const [showDateInputField, setShowDateInputField] = useState(false);
 

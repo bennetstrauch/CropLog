@@ -1,6 +1,5 @@
 import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "../authentification/AuthContext";
-import { CropsFieldsProvider } from "../context/CropsFieldsProvider";
 
 // Layouts
 import AuthLayout from "../authentification/AuthLayout";

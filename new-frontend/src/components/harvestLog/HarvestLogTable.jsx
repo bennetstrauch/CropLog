@@ -2,32 +2,34 @@ import React, { useEffect, useMemo, useState } from "react";
 import HarvestRecordRow from "./HarvestRecordRow";
 import { mapToHTML } from "../../service/utils";
 import { getEntriesFilteredBy } from "../../service/apiService";
-import { ProvideCropsAndFieldsContext } from "../../context/CropsFieldsProvider";
+import { useCrops } from "../../context/CropsProvider";
+import { useFieldsUnits } from "../../context/FieldsUnitsProvider";
 
 const HarvestLogTable = ({ dateRange }) => {
   console.log("RENDER HarvestLogTable");
 
   const [harvestEntries, setHarvestEntries] = useState([]);
-  const { cropsMap, fieldsMap } = ProvideCropsAndFieldsContext();
+  const { cropsMap } = useCrops();
+  const { fieldsMap } = useFieldsUnits();
 
+  const enrichedEntries = useMemo(() => {
+    return harvestEntries.map((entry) => {
+      const crop = cropsMap[entry.cropId];
+      const fieldNames = entry.fieldIds
+        .map((id) => fieldsMap[id]?.name)
+        .filter(Boolean);
 
- const enrichedEntries = useMemo(() => {
-  return harvestEntries.map(entry => {
-    const crop = cropsMap[entry.cropId];
-    const fieldNames = entry.fieldIds.map(id => fieldsMap[id]?.name).filter(Boolean);
-
-    return {
-      id: entry.id,
-      harvestDate: entry.date,
-      cropName: crop?.name || "Unknown Crop",
-      quantity: entry.harvestedQuantity,
-      // have abbreviation for measure unit displayed #####
-      measureUnitName: crop?.measureUnit || "?",
-      harvestedFieldNames: fieldNames,
-    };
-  });
-}, [harvestEntries, cropsMap, fieldsMap]);
-
+      return {
+        id: entry.id,
+        harvestDate: entry.date,
+        cropName: crop?.name || "Unknown Crop",
+        quantity: entry.harvestedQuantity,
+        // have abbreviation for measure unit displayed #####
+        measureUnitName: crop?.measureUnit || "?",
+        harvestedFieldNames: fieldNames,
+      };
+    });
+  }, [harvestEntries, cropsMap, fieldsMap]);
 
   // check rerenders, maybe use memo instead #
   useEffect(() => {
@@ -45,7 +47,10 @@ const HarvestLogTable = ({ dateRange }) => {
       enrichedEntries,
       // ## set needed?
       (entry, index) => (
-        <HarvestRecordRow key={entry.id} {...{ entry, index, setHarvestEntries }} />
+        <HarvestRecordRow
+          key={entry.id}
+          {...{ entry, index, setHarvestEntries }}
+        />
       )
     );
 

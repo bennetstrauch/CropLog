@@ -1,4 +1,3 @@
-import { ProvideCropsAndFieldsContext } from "../../context/CropsFieldsProvider";
 import "./fieldButton.css";
 import { useState } from "react";
 

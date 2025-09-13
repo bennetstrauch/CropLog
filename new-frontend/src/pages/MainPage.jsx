@@ -9,7 +9,6 @@ import DateInputField from "../Components/newHarvestEntry/DateInputField";
 import SelectCrop from "../Components/newHarvestEntry/SelectCrop";
 import FinalizeEntry from "../Components/newHarvestEntry/finalizeEntry";
 import { useDispatch } from "react-redux";
-import { ProvideCropsAndFieldsContext } from "../context/CropsFieldsProvider";
 import { Path_HarvestLog } from "../routes/AppRouter";
 import { logout } from "../reduxStore/Slices/AuthSlice";
 import useHarvestForm from "../components/newHarvestEntry/useHarvestForm";
@@ -37,8 +36,7 @@ function MainPage() {
 
   console.log("MainPage - harvestedFields:", harvestedFieldsRef);
 
-  const { setLatestEntry } = ProvideCropsAndFieldsContext();
-  const { submitHarvestEntry } = useHarvestSubmit(setLatestEntry);
+  const { submitHarvestEntry } = useHarvestSubmit();
 
   const [showDateInputField, setShowDateInputField] = useState(false);
 
@@ -90,7 +88,7 @@ function MainPage() {
     console.log("addedEntryId", addedEntryId);
 
     const addedEntry = await getHarvestRecord(addedEntryId);
-    setLatestEntry(addedEntry);
+    // Latest entry tracking removed - handled by hooks
     console.log("added Entry", addedEntry);
   }
 

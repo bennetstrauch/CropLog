@@ -1,14 +1,17 @@
 // src/context/AppProviders.jsx
 import React from "react";
 import { Outlet } from "react-router-dom";
-import { CropsFieldsProvider } from "./CropsFieldsProvider";
+import { CropsProvider } from "./CropsProvider";
+import { FieldsUnitsProvider } from "./FieldsUnitsProvider";
 import { CategoriesProvider } from "./CategoriesProvider";
 
 export default function AppProviders({ children }) {
-  // if children exists (manually composed) render them, otherwise render an Outlet
+  // Priority loading: Crops first, then fields/units and categories in background
   return (
-    <CropsFieldsProvider>
-      <CategoriesProvider>{children ?? <Outlet />}</CategoriesProvider>
-    </CropsFieldsProvider>
+    <CropsProvider>
+      <FieldsUnitsProvider>
+        <CategoriesProvider>{children ?? <Outlet />}</CategoriesProvider>
+      </FieldsUnitsProvider>
+    </CropsProvider>
   );
 }

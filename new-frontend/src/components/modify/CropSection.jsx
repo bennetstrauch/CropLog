@@ -9,12 +9,13 @@ import {
   updateCrop,
   getMeasureUnits,
 } from "../../service/modifyService";
-import { ProvideCropsAndFieldsContext } from "../../context/CropsFieldsProvider";
+import { useCrops } from "../../context/CropsProvider";
+import { useFieldsUnits } from "../../context/FieldsUnitsProvider";
 import { useCategories } from "../../context/CategoriesProvider";
 
 const CropSection = () => {
-  const { crops, setCrops, measureUnits, setMeasureUnits } =
-    ProvideCropsAndFieldsContext();
+  const { crops, setCrops } = useCrops();
+  const { measureUnits, setMeasureUnits } = useFieldsUnits();
   const { categories } = useCategories();
 
   const [pendingCrops, setPendingCrops] = useState([]); // holds crops that need category resolution
@@ -26,12 +27,10 @@ const CropSection = () => {
 
       console.log("New crops returned:", newCrops);
 
-
-
       // separate crops that still need category resolution
       const unresolved = newCrops.filter((c) => !c.categoryResolved);
       const resolved = newCrops.filter((c) => c.categoryResolved);
-console.log("Unresolved crops:", unresolved);
+      console.log("Unresolved crops:", unresolved);
 
       if (resolved.length > 0) {
         setCrops((prev) => [...prev, ...resolved]);
@@ -49,7 +48,7 @@ console.log("Unresolved crops:", unresolved);
   const handleUpdateCrop = async (id, field, value) => {
     try {
       // Find the current crop to get all existing values
-      const currentCrop = crops.find(c => c.id === id);
+      const currentCrop = crops.find((c) => c.id === id);
       if (!currentCrop) {
         throw new Error("Crop not found");
       }
@@ -57,8 +56,9 @@ console.log("Unresolved crops:", unresolved);
       // Create complete request with updated field
       const completeRequest = {
         name: currentCrop.name,
-        measureUnitId: field === 'measureUnitId' ? value : currentCrop.measureUnitId,
-        categoryId: field === 'categoryId' ? value : currentCrop.categoryId
+        measureUnitId:
+          field === "measureUnitId" ? value : currentCrop.measureUnitId,
+        categoryId: field === "categoryId" ? value : currentCrop.categoryId,
       };
 
       const updatedCrop = await updateCrop(id, completeRequest);

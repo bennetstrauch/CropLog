@@ -1,14 +1,12 @@
 //REFACTOR!!!#
-import { useContext } from "react";
-
 import { mapToHTML } from "../../service/utils";
-import { CropsFieldsContext } from "../../context/CropsFieldsProvider";
+import { useCrops } from "../../context/CropsProvider";
 import { useNavigate } from "react-router-dom";
 import { Path_NewEntry } from "../../routes/AppRouter";
 
 function CropButtons({ harvestDate, harvestedFieldsRef }) {
   const navigate = useNavigate();
-  const { crops } = useContext(CropsFieldsContext);
+  const { crops } = useCrops();
 
   //#bessere Namen für Handle click function
   const handleClick = (crop) => {
