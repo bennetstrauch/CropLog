@@ -140,21 +140,27 @@ const CategorySuggestionModal = ({ crops, categories, onClose, onCropsUpdated })
         newCategories = await createCategories(newCategoryNames);
       }
 
-      const nameToId = Object.fromEntries(newCategories.map((c) => [c.name, c.id]));
+      const nameToId = Object.fromEntries(newCategories.map((c) => [c.name.toUpperCase(), c.id]));
+      console.log("nameToId mapping:", nameToId);
 
       // Build update payload
       const updates = crops.map((crop) => {
         const sel = cropSelections[crop.id];
         let categoryId = null;
 
+        console.log(`Crop ${crop.name}: sel.type=${sel.type}, sel.value="${sel.value}"`);
+
         if (sel.type === "existing") {
           categoryId = parseInt(sel.value, 10);
         } else if (sel.type === "suggested" || sel.type === "new") {
-          categoryId = nameToId[sel.value];
+          categoryId = nameToId[sel.value.trim().toUpperCase()];
+          console.log(`Looking up "${sel.value.trim().toUpperCase()}" in nameToId, found: ${categoryId}`);
         }
 
         return { id: crop.id, categoryId };
       });
+
+      console.log("Updates to send:", updates);
 
       await Promise.all(updates.map((u) => updateCrop(u.id, { categoryId: u.categoryId })));
 
