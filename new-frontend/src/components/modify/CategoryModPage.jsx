@@ -1,23 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { getCategories } from "../../service/modifyService";
+import React from "react";
+import { useCategories } from "../../context/CategoriesProvider";
 import AddCategory from "./AddCategory";
 import CategoryList from "./CategoryList";
 
 const CategoryModPage = () => {
-  const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  const loadCategories = async () => {
-    try {
-      const data = await getCategories();
-      setCategories(data);
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
-    }
-  };
+  const { categories, setCategories } = useCategories();
 
   const handleCategoryAdded = (newCat) => {
     setCategories((prev) => [...prev, newCat]);

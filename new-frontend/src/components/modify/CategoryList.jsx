@@ -17,3 +17,5 @@ const CategoryList = ({ categories }) => {
 };
 
 export default CategoryList;
+
+// #### have no reload of categories when swithcing mod pages shoudl happen
