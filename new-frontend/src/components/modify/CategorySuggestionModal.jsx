@@ -126,22 +126,42 @@ const CategorySuggestionModal = ({ crops, categories, onClose, onCropsUpdated })
     setSaving(true);
     try {
       // Create new categories (including suggested ones that user wants to save)
-      const newCategoryNames = [
+      // First, get unique category names that need to be created
+      const categoryNamesToCreate = [
         ...new Set(
           Object.values(cropSelections)
             .filter((sel) => sel.type === "new" || sel.type === "suggested")
-            .map((sel) => ({ name: sel.value.trim() }))
+            .map((sel) => sel.value.trim())
+            .filter((name) => name) // Remove empty strings
         ),
       ];
 
+      // Filter out categories that already exist
+      const existingCategoryNames = new Set(categories.map(c => c.name.toUpperCase()));
+      const newCategoryNames = categoryNamesToCreate
+        .filter(name => !existingCategoryNames.has(name.toUpperCase()))
+        .map(name => ({ name }));
+
       let newCategories = [];
-      console.log("New categories to create:", newCategoryNames);
+      console.log("Categories to create (filtered):", newCategoryNames);
       if (newCategoryNames.length > 0) {
         newCategories = await createCategories(newCategoryNames);
       }
 
-      const nameToId = Object.fromEntries(newCategories.map((c) => [c.name.toUpperCase(), c.id]));
-      console.log("nameToId mapping:", nameToId);
+      // Create combined mapping of all categories (existing + newly created)
+      const allCategoriesMap = new Map();
+
+      // Add existing categories
+      categories.forEach(cat => {
+        allCategoriesMap.set(cat.name.toUpperCase(), cat.id);
+      });
+
+      // Add newly created categories
+      newCategories.forEach(cat => {
+        allCategoriesMap.set(cat.name.toUpperCase(), cat.id);
+      });
+
+      console.log("All categories mapping:", Object.fromEntries(allCategoriesMap));
 
       // Build update payload
       const updates = crops.map((crop) => {
@@ -153,8 +173,9 @@ const CategorySuggestionModal = ({ crops, categories, onClose, onCropsUpdated })
         if (sel.type === "existing") {
           categoryId = parseInt(sel.value, 10);
         } else if (sel.type === "suggested" || sel.type === "new") {
-          categoryId = nameToId[sel.value.trim().toUpperCase()];
-          console.log(`Looking up "${sel.value.trim().toUpperCase()}" in nameToId, found: ${categoryId}`);
+          const categoryName = sel.value.trim().toUpperCase();
+          categoryId = allCategoriesMap.get(categoryName);
+          console.log(`Looking up "${categoryName}" in allCategories, found: ${categoryId}`);
         }
 
         return { id: crop.id, categoryId };
@@ -167,8 +188,12 @@ const CategorySuggestionModal = ({ crops, categories, onClose, onCropsUpdated })
       onCropsUpdated();
       onClose();
     } catch (err) {
-      console.error(err);
-      setError("Failed to save. Please try again.");
+      console.error("Category save error:", err);
+      if (err.message?.includes('duplicate key') || err.response?.status === 500) {
+        setError("Some categories already exist. Please try again or use different names.");
+      } else {
+        setError("Failed to save categories and update crops. Please try again.");
+      }
     } finally {
       setSaving(false);
     }
