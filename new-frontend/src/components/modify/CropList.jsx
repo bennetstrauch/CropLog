@@ -2,6 +2,9 @@ import React, { useState } from "react";
 
 const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelected }) => {
   const [selectedIds, setSelectedIds] = useState([]);
+  const [editingCrop, setEditingCrop] = useState(null);
+  const [editingName, setEditingName] = useState("");
+  const [saveTimeout, setSaveTimeout] = useState(null);
 
   const toggleSelection = (id) => {
     setSelectedIds((prev) =>
@@ -13,6 +16,67 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
     onUpdateCrop(id, field, value); // optimistic update
   };
 
+  const startEditingName = (crop) => {
+    // Clear any pending save
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+      setSaveTimeout(null);
+    }
+    setEditingCrop(crop.id);
+    setEditingName(crop.name);
+  };
+
+  const saveEditingName = () => {
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+      setSaveTimeout(null);
+    }
+
+    const originalName = crops.find(c => c.id === editingCrop)?.name;
+    if (editingName.trim() && editingName.trim() !== originalName) {
+      onUpdateCrop(editingCrop, "name", editingName.trim());
+    }
+    setEditingCrop(null);
+    setEditingName("");
+  };
+
+  const cancelEditingName = () => {
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+      setSaveTimeout(null);
+    }
+    setEditingCrop(null);
+    setEditingName("");
+  };
+
+  const handleNameChange = (value) => {
+    setEditingName(value);
+
+    // Clear existing timeout
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+    }
+
+    // Set new timeout for auto-save after 4 seconds of no typing
+    const timeout = setTimeout(() => {
+      const originalName = crops.find(c => c.id === editingCrop)?.name;
+      if (value.trim() && value.trim() !== originalName) {
+        onUpdateCrop(editingCrop, "name", value.trim());
+        // Don't exit edit mode on auto-save, keep the field active
+      }
+    }, 2000);
+
+    setSaveTimeout(timeout);
+  };
+
+  const handleNameKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      saveEditingName();
+    } else if (e.key === 'Escape') {
+      cancelEditingName();
+    }
+  };
+
   const handleDelete = () => {
     if (selectedIds.length === 0) return alert("No crops selected.");
     if (window.confirm("Are you sure you want to delete the selected crops?")) {
@@ -22,112 +86,150 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
   };
 
   return (
-    <section>
-      <h2>Crops</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Measure Unit</th>
-            <th>Category</th>
-            <th
-              style={{
-                cursor: selectedIds.length > 0 ? 'pointer' : 'default',
-                color: selectedIds.length > 0 ? '#dc2626' : 'inherit',
-                fontWeight: selectedIds.length > 0 ? 'bold' : 'normal'
-              }}
-              onClick={selectedIds.length > 0 ? handleDelete : undefined}
-              title={selectedIds.length > 0 ? `Delete ${selectedIds.length} selected crop${selectedIds.length > 1 ? 's' : ''}` : ''}
-            >
-              Delete {selectedIds.length > 0 && `(${selectedIds.length})`}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {crops.map((crop, index) => (
-            <tr key={crop.id}>
-              <td>{index + 1}</td>
-              <td>{crop.name}</td>
-              {/* --- Measure Unit Select --- */}
-              <td>
-                <select
-                  value={crop.measureUnitId ?? ""}
-                  onChange={(e) =>
-                    handleChange(crop.id, "measureUnitId", Number(e.target.value) || null)
-                  }
-                >
-                  <option value="">-- Select Measure Unit --</option>
-                  {measureUnits.map((unit) => (
-                    <option key={unit.id} value={unit.id}>
-                      {unit.name}
-                    </option>
-                  ))}
-                </select>
-              </td>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-900">Crop Management</h2>
+        {crops.length > 0 && (
+          <p className="text-sm text-gray-500 mt-1">
+            {crops.length} crop{crops.length !== 1 ? 's' : ''} total
+            {selectedIds.length > 0 && ` • ${selectedIds.length} selected`}
+          </p>
+        )}
+      </div>
 
-              {/* --- Category Select --- */}
-              <td>
-                <select
-                  value={crop.categoryId ?? ""}
-                  onChange={(e) =>
-                    handleChange(crop.id, "categoryId", Number(e.target.value) || null)
-                  }
+      {crops.length === 0 ? (
+        <div className="px-6 py-12 text-center">
+          <div className="text-gray-400 mb-2">
+            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2"/>
+            </svg>
+          </div>
+          <h3 className="text-gray-500 font-medium">No crops yet</h3>
+          <p className="text-gray-400 text-sm">Add your first crop using the form above</p>
+        </div>
+      ) : (
+        <div className="overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                  #
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Crop Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Measure Unit
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Category
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 transition-all duration-200 ${
+                    selectedIds.length > 0
+                      ? 'text-red-600 cursor-pointer hover:text-red-700 hover:bg-red-50'
+                      : 'text-gray-500'
+                  }`}
+                  onClick={selectedIds.length > 0 ? handleDelete : undefined}
+                  title={selectedIds.length > 0 ? `Delete ${selectedIds.length} selected crop${selectedIds.length > 1 ? 's' : ''}` : ''}
                 >
-                  <option value="">-- No Category --</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-              </td>
+                  Select {selectedIds.length > 0 && `(${selectedIds.length})`}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {crops.map((crop, index) => (
+                <tr key={crop.id} className={`hover:bg-gray-50 transition-colors duration-150 ${selectedIds.includes(crop.id) ? 'bg-blue-50' : ''}`}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {index + 1}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {editingCrop === crop.id ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => handleNameChange(e.target.value)}
+                          onKeyDown={handleNameKeyDown}
+                          onBlur={saveEditingName}
+                          className="text-sm font-medium border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors px-2 py-1 min-w-0 flex-1 bg-white text-gray-900"
+                          autoFocus
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className="text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors py-1 px-2 rounded hover:bg-gray-50"
+                        onClick={() => startEditingName(crop)}
+                        title="Click to edit crop name"
+                      >
+                        {crop.name}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <select
+                      value={crop.measureUnitId ?? ""}
+                      onChange={(e) =>
+                        handleChange(crop.id, "measureUnitId", Number(e.target.value) || null)
+                      }
+                      className="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors bg-white text-gray-900 min-w-0 w-full"
+                    >
+                      <option value="" className="text-gray-500">Select unit</option>
+                      {measureUnits.map((unit) => (
+                        <option key={unit.id} value={unit.id} className="text-gray-900">
+                          {unit.name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
 
-              <td>
-                <input
-                  type="checkbox"
-                  checked={selectedIds.includes(crop.id)}
-                  onChange={() => toggleSelection(crop.id)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <select
+                      value={crop.categoryId ?? ""}
+                      onChange={(e) =>
+                        handleChange(crop.id, "categoryId", Number(e.target.value) || null)
+                      }
+                      className="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors bg-white text-gray-900 min-w-0 w-full"
+                    >
+                      <option value="" className="text-gray-500">No category</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id} className="text-gray-900">
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(crop.id)}
+                      onChange={() => toggleSelection(crop.id)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Floating delete bar */}
       {selectedIds.length > 0 && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: '#dc2626',
-            color: 'white',
-            padding: '12px 24px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-            zIndex: 1000,
-            fontWeight: 'bold',
-            transition: 'all 0.2s ease',
-            userSelect: 'none'
-          }}
-          onClick={handleDelete}
-          onMouseEnter={(e) => {
-            e.target.style.backgroundColor = '#b91c1c';
-            e.target.style.transform = 'translateX(-50%) scale(1.05)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.backgroundColor = '#dc2626';
-            e.target.style.transform = 'translateX(-50%) scale(1)';
-          }}
-        >
-          🗑️ Delete {selectedIds.length} Selected Crop{selectedIds.length > 1 ? 's' : ''}
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-2 duration-300">
+          <button
+            onClick={handleDelete}
+            className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center gap-2 select-none"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete {selectedIds.length} Crop{selectedIds.length > 1 ? 's' : ''}
+          </button>
         </div>
       )}
-    </section>
+    </div>
   );
 };
 

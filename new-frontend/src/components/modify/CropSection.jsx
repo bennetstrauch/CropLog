@@ -56,7 +56,7 @@ const CropSection = () => {
 
       // Create complete request with updated field
       const completeRequest = {
-        name: currentCrop.name,
+        name: field === "name" ? value : currentCrop.name,
         measureUnitId:
           field === "measureUnitId" ? value : currentCrop.measureUnitId,
         categoryId: field === "categoryId" ? value : currentCrop.categoryId,
