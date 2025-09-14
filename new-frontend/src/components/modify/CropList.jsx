@@ -31,7 +31,17 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
             <th>Name</th>
             <th>Measure Unit</th>
             <th>Category</th>
-            <th>Delete</th>
+            <th
+              style={{
+                cursor: selectedIds.length > 0 ? 'pointer' : 'default',
+                color: selectedIds.length > 0 ? '#dc2626' : 'inherit',
+                fontWeight: selectedIds.length > 0 ? 'bold' : 'normal'
+              }}
+              onClick={selectedIds.length > 0 ? handleDelete : undefined}
+              title={selectedIds.length > 0 ? `Delete ${selectedIds.length} selected crop${selectedIds.length > 1 ? 's' : ''}` : ''}
+            >
+              Delete {selectedIds.length > 0 && `(${selectedIds.length})`}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -85,7 +95,38 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
         </tbody>
       </table>
 
-      <button onClick={handleDelete}>Delete Selected Crops</button>
+      {/* Floating delete bar */}
+      {selectedIds.length > 0 && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: '#dc2626',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            zIndex: 1000,
+            fontWeight: 'bold',
+            transition: 'all 0.2s ease',
+            userSelect: 'none'
+          }}
+          onClick={handleDelete}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = '#b91c1c';
+            e.target.style.transform = 'translateX(-50%) scale(1.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = '#dc2626';
+            e.target.style.transform = 'translateX(-50%) scale(1)';
+          }}
+        >
+          🗑️ Delete {selectedIds.length} Selected Crop{selectedIds.length > 1 ? 's' : ''}
+        </div>
+      )}
     </section>
   );
 };
