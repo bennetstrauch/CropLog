@@ -3,14 +3,14 @@ import HarvestRecordRow from "./HarvestRecordRow";
 import { mapToHTML } from "../../service/utils";
 import { getEntriesFilteredBy } from "../../service/apiService";
 import { useCrops } from "../../context/CropsProvider";
-import { useFieldsUnits } from "../../context/FieldsUnitsProvider";
+import { useFields } from "../../context/FieldsProvider";
 
 const HarvestLogTable = ({ dateRange }) => {
   console.log("RENDER HarvestLogTable");
 
   const [harvestEntries, setHarvestEntries] = useState([]);
   const { cropsMap } = useCrops();
-  const { fieldsMap } = useFieldsUnits();
+  const { fieldsMap } = useFields();
 
   const enrichedEntries = useMemo(() => {
     return harvestEntries.map((entry) => {

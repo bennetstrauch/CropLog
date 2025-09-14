@@ -84,6 +84,6 @@ export const createCategories = async (categories) => {
   }
 
 console.log("Creating categories:", categories);
-  const response = await axios.post("/api/categories/batch", categories);
-  return response.data; // should be an array of CategoryResponse {id, name}
+  const response = await post("categories/batch", categories);
+  return response; // post() already returns the response data
 };

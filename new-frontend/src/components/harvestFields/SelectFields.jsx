@@ -1,9 +1,9 @@
 import { mapToHTML } from "../../service/utils";
 import FieldButton from "./FieldButton";
-import { useFieldsUnits } from "../../context/FieldsUnitsProvider";
+import { useFields } from "../../context/FieldsProvider";
 
 function SelectFields({ harvestedFieldsRef }) {
-  const { fields } = useFieldsUnits();
+  const { fields } = useFields();
 
   const createButtonsForEachField = mapToHTML(fields, (field) => (
     <FieldButton

@@ -2,16 +2,19 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { CropsProvider } from "./CropsProvider";
-import { FieldsUnitsProvider } from "./FieldsUnitsProvider";
+import { FieldsProvider } from "./FieldsProvider";
+import { MeasureUnitsProvider } from "./MeasureUnitsProvider";
 import { CategoriesProvider } from "./CategoriesProvider";
 
 export default function AppProviders({ children }) {
-  // Priority loading: Crops first, then fields/units and categories in background
+  // Priority loading: Crops first, then fields, measure units, and categories load independently in background
   return (
     <CropsProvider>
-      <FieldsUnitsProvider>
-        <CategoriesProvider>{children ?? <Outlet />}</CategoriesProvider>
-      </FieldsUnitsProvider>
+      <FieldsProvider>
+        <MeasureUnitsProvider>
+          <CategoriesProvider>{children ?? <Outlet />}</CategoriesProvider>
+        </MeasureUnitsProvider>
+      </FieldsProvider>
     </CropsProvider>
   );
 }

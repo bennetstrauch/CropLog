@@ -125,11 +125,11 @@ const CategorySuggestionModal = ({ crops, categories, onClose, onCropsUpdated })
 
     setSaving(true);
     try {
-      // Create new categories
+      // Create new categories (including suggested ones that user wants to save)
       const newCategoryNames = [
         ...new Set(
           Object.values(cropSelections)
-            .filter((sel) => sel.type === "new")
+            .filter((sel) => sel.type === "new" || sel.type === "suggested")
             .map((sel) => ({ name: sel.value.trim() }))
         ),
       ];

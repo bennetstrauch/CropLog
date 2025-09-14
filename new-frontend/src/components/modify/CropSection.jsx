@@ -8,15 +8,16 @@ import {
   deleteCrops,
   updateCrop,
   getMeasureUnits,
+  getCategories,
 } from "../../service/modifyService";
 import { useCrops } from "../../context/CropsProvider";
-import { useFieldsUnits } from "../../context/FieldsUnitsProvider";
+import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
 import { useCategories } from "../../context/CategoriesProvider";
 
 const CropSection = () => {
   const { crops, setCrops } = useCrops();
-  const { measureUnits, setMeasureUnits } = useFieldsUnits();
-  const { categories } = useCategories();
+  const { measureUnits, setMeasureUnits } = useMeasureUnits();
+  const { categories, setCategories } = useCategories();
 
   const [pendingCrops, setPendingCrops] = useState([]); // holds crops that need category resolution
   const [modalOpen, setModalOpen] = useState(false);
@@ -85,12 +86,16 @@ const CropSection = () => {
   };
 
   const handleModalCropsUpdated = async () => {
-    // Re-fetch crops so we get fresh state after user confirmed categories
+    // Re-fetch crops and categories so we get fresh state after user confirmed categories
     try {
-      const refreshed = await getCrops();
-      setCrops(refreshed);
+      const [refreshedCrops, refreshedCategories] = await Promise.all([
+        getCrops(),
+        getCategories()
+      ]);
+      setCrops(refreshedCrops);
+      setCategories(refreshedCategories);
     } catch {
-      console.warn("Failed to refresh crops after category suggestion save.");
+      console.warn("Failed to refresh crops and categories after category suggestion save.");
     }
   };
 
