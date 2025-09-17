@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import CropForm from "./CropForm";
+import AddCropForm from "./AddCropForm";
 import CropList from "./CropList";
 import CategorySuggestionModal from "./CategorySuggestionModal";
 import {
@@ -101,7 +101,7 @@ const CropSection = () => {
 
   return (
     <div>
-      <CropForm measureUnits={measureUnits} onAdd={handleAddCrops} />
+      <AddCropForm measureUnits={measureUnits} onAdd={handleAddCrops} />
 
       <CropList
         crops={crops}

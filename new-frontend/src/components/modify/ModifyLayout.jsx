@@ -36,7 +36,7 @@ const ModifyLayout = () => {
         </button>
       </div>
 
-      <div className="turquoiseBorder_Div">
+      <div className="">
         <Outlet />
       </div>
     </div>
