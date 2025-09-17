@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getMeasureUnits } from "../../service/modifyService";
-import AddMeasureUnit from "./AddMeasureUnit";
+import AddMeasureUnitForm from "./AddMeasureUnitForm";
 import MeasureUnitList from "./MeasureUnitList";
 
 const MeasureUnitModPage = () => {
@@ -25,7 +25,7 @@ const MeasureUnitModPage = () => {
 
   return (
     <div>
-      <AddMeasureUnit onAdded={handleAdded} />
+      <AddMeasureUnitForm onAdded={handleAdded} />
       <MeasureUnitList units={units} />
     </div>
   );

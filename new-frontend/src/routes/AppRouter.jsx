@@ -17,13 +17,10 @@ import NotFoundPage from "../pages/NotFoundPage"; // A component for 404 errors
 import FinalizeEntry from "../Components/newHarvestEntry/finalizeEntry";
 import ModifyValues from "../components/modify/ModifyValues";
 
-import CropList from "../components/modify/CropList";
-import FieldList from "../components/modify/FieldList";
-import MeasureUnitList from "../components/modify/AddMeasureUnit";
-import CategoryList from "../components/modify/CategoryList";
 import CropSection from "../components/modify/CropSection";
-import CategoryModPage from "../components/modify/CategoryModPage";
-import MeasureUnitModPage from "../components/modify/MeasureUnitModPage";
+import FieldSection from "../components/modify/FieldSection";
+import MeasureUnitSection from "../components/modify/MeasureUnitSection";
+import CategorySection from "../components/modify/CategorySection";
 import { CategoriesProvider } from "../context/CategoriesProvider";
 import AppProviders from "../context/AppProviders";
 
@@ -60,11 +57,11 @@ function AppRouter() {
               <Route path={`${Path_NewEntry}/:cropName`} element={<FinalizeEntry />} />
 
               <Route path={Path_Modify} element={<ModifyLayout />}>
-                <Route index element={<CropSection />} /> 
+                <Route index element={<CropSection />} />
                 <Route path={Term_Crops} element={<CropSection />} />
-                <Route path={Term_Fields} element={<FieldList />} />
-                <Route path={Term_MeasureUnits} element={<MeasureUnitModPage />} />
-                <Route path={Term_Categories} element={<CategoryModPage />} />
+                <Route path={Term_Fields} element={<FieldSection />} />
+                <Route path={Term_MeasureUnits} element={<MeasureUnitSection />} />
+                <Route path={Term_Categories} element={<CategorySection />} />
               </Route>
           </Route>
         </Route>

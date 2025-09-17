@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Read(//c/Users/strau/OneDrive/Desktop/**)",
-      "Read(//c/Users/strau/OneDrive/[B] Bilder/Screenshots/**)"
+      "Read(//c/Users/strau/OneDrive/[B] Bilder/Screenshots/**)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []

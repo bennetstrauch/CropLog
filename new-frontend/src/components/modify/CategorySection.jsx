@@ -1,9 +1,9 @@
 import React from "react";
-import { useCategories } from "../../context/CategoriesProvider";
 import AddCategoryForm from "./AddCategoryForm";
 import CategoryList from "./CategoryList";
+import { useCategories } from "../../context/CategoriesProvider";
 
-const CategoryModPage = () => {
+const CategorySection = () => {
   const { categories, setCategories } = useCategories();
 
   const handleCategoryAdded = (newCat) => {
@@ -18,4 +18,4 @@ const CategoryModPage = () => {
   );
 };
 
-export default CategoryModPage;
+export default CategorySection;

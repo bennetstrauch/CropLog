@@ -1,40 +1,34 @@
 
-
-// ==========================
-// File: MeasureUnitSection.jsx
-// ==========================
 import React, { useEffect, useState } from "react";
-import { deleteValues, getMeasureUnits } from "../../service/modifyService";
-import DeleteValueList from "./DeleteValueList";
+import AddMeasureUnitForm from "./AddMeasureUnitForm";
+import MeasureUnitList from "./MeasureUnitList";
+import { getMeasureUnits } from "../../service/modifyService";
 
 const MeasureUnitSection = () => {
   const [units, setUnits] = useState([]);
-  const [selectedToDelete, setSelectedToDelete] = useState([]);
 
   useEffect(() => {
-    getMeasureUnits().then(setUnits);
+    loadUnits();
   }, []);
 
-  const handleDelete = async () => {
+  const loadUnits = async () => {
     try {
-      await deleteValues(selectedToDelete, "units");
-      setUnits(units.filter((u) => !selectedToDelete.includes(u)));
-      setSelectedToDelete([]);
-    } catch {
-      alert("Failed to delete measure units.");
+      const data = await getMeasureUnits();
+      setUnits(data);
+    } catch (err) {
+      console.error("Failed to fetch measure units", err);
     }
   };
 
+  const handleAdded = (newUnit) => {
+    setUnits((prev) => [...prev, newUnit]);
+  };
+
   return (
-    <section>
-      <h2>Delete Measure Units</h2>
-      <DeleteValueList
-        values={units}
-        selected={selectedToDelete}
-        setSelected={setSelectedToDelete}
-      />
-      <button onClick={handleDelete}>Delete Selected Units</button>
-    </section>
+    <div>
+      <AddMeasureUnitForm onAdded={handleAdded} />
+      <MeasureUnitList units={units} />
+    </div>
   );
 };
 

@@ -1,34 +1,34 @@
-
-// ==========================
-// File: FieldSection.jsx
-// ==========================
-import React, { useState } from "react";
-import { addGenericValues } from "../../service/modifyService";
-import { formatValueListForDatabase } from "../../service/utils";
+import React, { useEffect, useState } from "react";
+import AddFieldForm from "./AddFieldForm";
+import FieldList from "./FieldList";
+import { getFields } from "../../service/modifyService";
 
 const FieldSection = () => {
-  const [fieldsInput, setFieldsInput] = useState("");
+  const [fields, setFields] = useState([]);
 
-  const handleAddFields = async () => {
-    const fields = formatValueListForDatabase(fieldsInput)
+  useEffect(() => {
+    loadFields();
+  }, []);
+
+  const loadFields = async () => {
     try {
-      await addGenericValues(fields, "fields");
-      setFieldsInput("");
+      const data = await getFields();
+      setFields(data);
     } catch (err) {
-      alert("Failed to add fields.");
+      console.error("Failed to fetch fields", err);
     }
   };
 
+  const handleFieldAdded = () => {
+    // Reload fields after adding new ones
+    loadFields();
+  };
+
   return (
-    <section>
-      <h2>Add Fields</h2>
-      <input
-        value={fieldsInput}
-        onChange={(e) => setFieldsInput(e.target.value)}
-        placeholder="e.g. Field A, Field B"
-      />
-      <button onClick={handleAddFields}>Add Fields</button>
-    </section>
+    <div>
+      <AddFieldForm onAdded={handleFieldAdded} />
+      <FieldList fields={fields} />
+    </div>
   );
 };
 
