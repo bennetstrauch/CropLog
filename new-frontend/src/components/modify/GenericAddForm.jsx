@@ -131,7 +131,10 @@ const GenericAddForm = ({
               </select>
               {secondaryInput.helperText && (
                 <div className="flex justify-end mt-1">
-                  <p className="text-xs text-blue-600 underline cursor-pointer hover:text-blue-700">
+                  <p
+                    className="text-xs text-blue-600 underline cursor-pointer hover:text-blue-700"
+                    onClick={secondaryInput.onHelperTextClick || (() => {})}
+                  >
                     {secondaryInput.helperText}
                   </p>
                 </div>

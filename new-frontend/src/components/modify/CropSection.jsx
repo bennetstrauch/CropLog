@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AddCropForm from "./AddCropForm";
 import CropList from "./CropList";
 import CategorySuggestionModal from "./CategorySuggestionModal";
+import MeasureUnitModal from "./MeasureUnitModal";
 import {
   getCrops,
   addCropsWithUnit,
@@ -21,6 +22,8 @@ const CropSection = () => {
 
   const [pendingCrops, setPendingCrops] = useState([]); // holds crops that need category resolution
   const [modalOpen, setModalOpen] = useState(false);
+  const [measureUnitModalOpen, setMeasureUnitModalOpen] = useState(false);
+  const [newlyCreatedMeasureUnit, setNewlyCreatedMeasureUnit] = useState(null);
 
   const handleAddCrops = async (cropsToAdd, measureUnit) => {
     try {
@@ -103,9 +106,30 @@ const CropSection = () => {
     }
   };
 
+  const handleOpenMeasureUnitModal = () => {
+    setMeasureUnitModalOpen(true);
+  };
+
+  const handleCloseMeasureUnitModal = () => {
+    setMeasureUnitModalOpen(false);
+  };
+
+  const handleMeasureUnitCreated = (newMeasureUnit) => {
+    // Update measure units context with the new unit
+    setMeasureUnits((prev) => [...prev, newMeasureUnit]);
+    // Set the newly created measure unit for auto-selection
+    setNewlyCreatedMeasureUnit(newMeasureUnit);
+  };
+
   return (
     <div>
-      <AddCropForm measureUnits={measureUnits} onAdd={handleAddCrops} />
+      <AddCropForm
+        measureUnits={measureUnits}
+        onAdd={handleAddCrops}
+        onOpenMeasureUnitModal={handleOpenMeasureUnitModal}
+        newlyCreatedMeasureUnit={newlyCreatedMeasureUnit}
+        onMeasureUnitSelected={() => setNewlyCreatedMeasureUnit(null)}
+      />
 
       <CropList
         crops={crops}
@@ -121,6 +145,13 @@ const CropSection = () => {
           categories={categories}
           onClose={handleModalClose}
           onCropsUpdated={handleModalCropsUpdated}
+        />
+      )}
+
+      {measureUnitModalOpen && (
+        <MeasureUnitModal
+          onClose={handleCloseMeasureUnitModal}
+          onMeasureUnitCreated={handleMeasureUnitCreated}
         />
       )}
     </div>

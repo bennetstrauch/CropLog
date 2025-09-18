@@ -146,13 +146,15 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Crop Management</h2>
-        {crops.length > 0 && (
-          <p className="text-sm text-gray-500 mt-1">
-            {crops.length} crop{crops.length !== 1 ? 's' : ''} total
-            {selectedIds.length > 0 && ` • ${selectedIds.length} selected`}
-          </p>
-        )}
+        <div className="flex items-center justify-center gap-3">
+          <h2 className="text-lg font-semibold text-gray-900">Crop Management</h2>
+          {crops.length > 0 && (
+            <span className="text-sm text-gray-500">
+              {crops.length} crop{crops.length !== 1 ? 's' : ''} total
+              {selectedIds.length > 0 && ` • ${selectedIds.length} selected`}
+            </span>
+          )}
+        </div>
       </div>
 
       {crops.length === 0 ? (
@@ -215,7 +217,13 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {getSortedCrops().map((crop, index) => (
-                <tr key={crop.id} className={`hover:bg-gray-50 transition-colors duration-150 ${selectedIds.includes(crop.id) ? 'bg-blue-50' : ''}`}>
+                <tr key={crop.id} className={`transition-colors duration-150 ${
+                  selectedIds.includes(crop.id)
+                    ? 'bg-blue-50 hover:bg-blue-100'
+                    : index % 2 === 0
+                      ? 'bg-white hover:bg-gray-50'
+                      : 'bg-yellow-50 hover:bg-yellow-100'
+                }`}>
                   {/* uncimment this and th above to have id displayed */}
                   {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {index + 1}
