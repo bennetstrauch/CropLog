@@ -68,4 +68,11 @@ public class CategoryController {
         boolean deleted = categoryService.delete(id, farmerId);
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
+    @DeleteMapping("/batch")
+    public ResponseEntity<Void> deleteBatch(@RequestBody List<Long> ids) {
+        Long farmerId = getAuthenticatedFarmerId();
+        int deletedCount = categoryService.deleteBatch(ids, farmerId);
+        return deletedCount > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
 }

@@ -4,6 +4,7 @@ import { mapToHTML } from "../../service/utils";
 import { getEntriesFilteredBy } from "../../service/apiService";
 import { useCrops } from "../../context/CropsProvider";
 import { useFields } from "../../context/FieldsProvider";
+import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
 
 const HarvestLogTable = ({ dateRange }) => {
   console.log("RENDER HarvestLogTable");
@@ -11,6 +12,7 @@ const HarvestLogTable = ({ dateRange }) => {
   const [harvestEntries, setHarvestEntries] = useState([]);
   const { cropsMap } = useCrops();
   const { fieldsMap } = useFields();
+  const { measureUnitsMap } = useMeasureUnits();
 
   const enrichedEntries = useMemo(() => {
     return harvestEntries.map((entry) => {
@@ -19,17 +21,19 @@ const HarvestLogTable = ({ dateRange }) => {
         .map((id) => fieldsMap[id]?.name)
         .filter(Boolean);
 
+      const measureUnit = measureUnitsMap[crop?.measureUnitId];
+      const measureUnitDisplay = measureUnit?.abbreviation || measureUnit?.name || "?";
+
       return {
         id: entry.id,
         harvestDate: entry.date,
         cropName: crop?.name || "Unknown Crop",
         quantity: entry.harvestedQuantity,
-        // have abbreviation for measure unit displayed #####
-        measureUnitName: crop?.measureUnit || "?",
+        measureUnitName: measureUnitDisplay,
         harvestedFieldNames: fieldNames,
       };
     });
-  }, [harvestEntries, cropsMap, fieldsMap]);
+  }, [harvestEntries, cropsMap, fieldsMap, measureUnitsMap]);
 
   // check rerenders, maybe use memo instead #
   useEffect(() => {

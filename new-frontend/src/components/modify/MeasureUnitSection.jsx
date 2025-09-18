@@ -1,33 +1,80 @@
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import AddMeasureUnitForm from "./AddMeasureUnitForm";
-import MeasureUnitList from "./MeasureUnitList";
-import { getMeasureUnits } from "../../service/modifyService";
+import GenericEntityList from "./GenericEntityList";
+import { updateMeasureUnit, deleteMeasureUnits } from "../../service/modifyService";
+import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
 
 const MeasureUnitSection = () => {
-  const [units, setUnits] = useState([]);
+  const { measureUnits, setMeasureUnits } = useMeasureUnits();
 
-  useEffect(() => {
-    loadUnits();
-  }, []);
+  const handleAdded = (newUnit) => {
+    setMeasureUnits((prev) => [...prev, newUnit]);
+  };
 
-  const loadUnits = async () => {
+  const handleUpdate = async (id, field, value) => {
     try {
-      const data = await getMeasureUnits();
-      setUnits(data);
-    } catch (err) {
-      console.error("Failed to fetch measure units", err);
+      const currentUnit = measureUnits.find(u => u.id === id);
+      if (!currentUnit) {
+        throw new Error("Measure unit not found");
+      }
+
+      const updateData = {
+        name: field === "name" ? value : currentUnit.name,
+        abbreviation: field === "abbreviation" ? value : currentUnit.abbreviation,
+      };
+
+      const updatedUnit = await updateMeasureUnit(id, updateData);
+      setMeasureUnits((prev) =>
+        prev.map((u) => (u.id === id ? updatedUnit : u))
+      );
+    } catch (error) {
+      console.error("Failed to update measure unit:", error);
+      alert("Failed to update measure unit.");
     }
   };
 
-  const handleAdded = (newUnit) => {
-    setUnits((prev) => [...prev, newUnit]);
+  const handleDeleteSelected = async (ids) => {
+    try {
+      await deleteMeasureUnits(ids);
+      setMeasureUnits((prev) => prev.filter((u) => !ids.includes(u.id)));
+    } catch (error) {
+      console.error("Failed to delete measure units:", error);
+      alert("Failed to delete measure units.");
+    }
   };
+
+  const fieldConfig = [
+    {
+      key: 'name',
+      label: 'Name',
+      type: 'text',
+      editable: true,
+      required: true
+    },
+    {
+      key: 'abbreviation',
+      label: 'Abbreviation',
+      type: 'text',
+      editable: true,
+      required: false
+    }
+  ];
 
   return (
     <div>
       <AddMeasureUnitForm onAdded={handleAdded} />
-      <MeasureUnitList units={units} />
+
+      <GenericEntityList
+        title="Measure Unit Management"
+        entities={measureUnits}
+        fields={fieldConfig}
+        onUpdate={handleUpdate}
+        onDeleteSelected={handleDeleteSelected}
+        sortable={['name', 'abbreviation']}
+        defaultSort="name"
+        emptyMessage="No measure units yet"
+      />
     </div>
   );
 };

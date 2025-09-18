@@ -6,6 +6,7 @@ import harvestLog.repository.MeasureUnitRepository;
 import harvestLog.service.IMeasureUnitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,6 +38,15 @@ public class MeasureUnitService implements IMeasureUnitService {
     @Override
     public void deleteById(Long id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public int deleteBatch(List<Long> ids, Long farmerId) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+        return repository.deleteByIdInAndFarmerId(ids, farmerId);
     }
 
 }

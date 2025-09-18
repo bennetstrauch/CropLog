@@ -99,4 +99,11 @@ public class MeasureUnitController {
 
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/batch")
+    public ResponseEntity<Void> deleteBatch(@RequestBody List<Long> ids) {
+        Long farmerId = getAuthenticatedFarmerId();
+        int deletedCount = measureUnitService.deleteBatch(ids, farmerId);
+        return deletedCount > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
 }

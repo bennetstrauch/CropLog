@@ -41,9 +41,35 @@ export const updateCrop = async (id, updates) => {
   return put(`crops/${id}`, updates); // if your backend expects PUT, swap to API.put
 };
 
+// Update other entities
+export const updateMeasureUnit = async (id, updates) => {
+  return put(`measure-units/${id}`, updates);
+};
+
+export const updateCategory = async (id, updates) => {
+  return put(`categories/${id}`, updates);
+};
+
+export const updateField = async (id, updates) => {
+  return put(`fields/${id}`, updates);
+};
+
 // delete many crops using batch delete endpoint
 export const deleteCrops = async (ids) => {
   return deleteRequest("crops/batch", ids);
+};
+
+// Batch delete functions for other entities
+export const deleteMeasureUnits = async (ids) => {
+  return deleteRequest("measure-units/batch", ids);
+};
+
+export const deleteCategories = async (ids) => {
+  return deleteRequest("categories/batch", ids);
+};
+
+export const deleteFields = async (ids) => {
+  return deleteRequest("fields/batch", ids);
 };
 
 
@@ -85,5 +111,15 @@ export const createCategories = async (categories) => {
 
 console.log("Creating categories:", categories);
   const response = await post("categories/batch", categories);
+  return response; // post() already returns the response data
+};
+
+export const createFields = async (fields) => {
+  if (!Array.isArray(fields)) {
+    throw new Error("createFields expects an array of field names");
+  }
+
+  console.log("Creating fields:", fields);
+  const response = await post("fields/batch", fields);
   return response; // post() already returns the response data
 };

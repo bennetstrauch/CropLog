@@ -14,7 +14,11 @@ public interface IFieldService {
 
     FieldResponse create(FieldRequest request, Long farmerId);
 
+    List<FieldResponse> createBatch(List<FieldRequest> requests, Long farmerId);
+
     Optional<FieldResponse> update(Long id, FieldRequest request, Long farmerId);
 
     boolean delete(Long id, Long farmerId);
+
+    int deleteBatch(List<Long> ids, Long farmerId);
 }

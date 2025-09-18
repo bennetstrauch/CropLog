@@ -11,5 +11,6 @@ public interface IMeasureUnitService {
 
     MeasureUnit save(MeasureUnit unit);
     void deleteById(Long id);
+    int deleteBatch(List<Long> ids, Long farmerId);
 
 }

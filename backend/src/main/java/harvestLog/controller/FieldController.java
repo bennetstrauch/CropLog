@@ -57,4 +57,18 @@ public class FieldController {
         return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
+    @PostMapping("/batch")
+    public ResponseEntity<List<FieldResponse>> createBatch(@Valid @RequestBody List<FieldRequest> requests) {
+        Long farmerId = getAuthenticatedFarmerId();
+        List<FieldResponse> created = fieldService.createBatch(requests, farmerId);
+        return ResponseEntity.status(201).body(created);
+    }
+
+    @DeleteMapping("/batch")
+    public ResponseEntity<Void> deleteBatch(@RequestBody List<Long> ids) {
+        Long farmerId = getAuthenticatedFarmerId();
+        int deletedCount = fieldService.deleteBatch(ids, farmerId);
+        return deletedCount > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
 }

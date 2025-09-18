@@ -18,6 +18,7 @@ public interface ICategoryService {
 
     Optional<CategoryResponse> update(Long id, CategoryRequest request, Long farmerId);
     boolean delete(Long id, Long farmerId);
+    int deleteBatch(List<Long> ids, Long farmerId);
 
     Category getOrCreateActiveByName(String name, Long farmerId);
 }

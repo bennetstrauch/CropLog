@@ -64,6 +64,34 @@ public class FieldService implements IFieldService {
         return false;
     }
 
+    @Transactional
+    public List<FieldResponse> createBatch(List<FieldRequest> requests, Long farmerId) {
+        Farmer farmer = farmerRepo.findById(farmerId)
+                .orElseThrow(() -> new IllegalArgumentException("Farmer not found: " + farmerId));
+
+        List<Field> fields = requests.stream()
+                .map(request -> {
+                    Field field = new Field();
+                    field.setName(request.name());
+                    field.setFarmer(farmer);
+                    return field;
+                })
+                .collect(Collectors.toList());
+
+        List<Field> savedFields = fieldRepo.saveAll(fields);
+        return savedFields.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public int deleteBatch(List<Long> ids, Long farmerId) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+        return fieldRepo.deleteByIdInAndFarmerId(ids, farmerId);
+    }
+
     private Field toEntity(FieldRequest request, Long farmerId) {
         Farmer farmer = farmerRepo.findById(farmerId)
                 .orElseThrow(() -> new IllegalArgumentException("Farmer not found: " + farmerId));

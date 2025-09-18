@@ -120,6 +120,15 @@ public class CategoryService implements ICategoryService {
                 .orElse(false);
     }
 
+    @Override
+    @Transactional
+    public int deleteBatch(List<Long> ids, Long farmerId) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+        return categoryRepository.deleteByIdInAndFarmerId(ids, farmerId);
+    }
+
     /**
      * Internal domain method used by other services.
      * Returns a Category entity (reactivating if needed) for the given farmer.
