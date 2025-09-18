@@ -54,19 +54,23 @@ const CropSection = () => {
         throw new Error("Crop not found");
       }
 
-      // Create complete request with updated field
+      // Create complete request with updated field - backend expects IDs
       const completeRequest = {
         name: field === "name" ? value : currentCrop.name,
-        measureUnitId:
-          field === "measureUnitId" ? value : currentCrop.measureUnitId,
+        measureUnitId: field === "measureUnitId" ? value : currentCrop.measureUnitId,
         categoryId: field === "categoryId" ? value : currentCrop.categoryId,
       };
 
+      console.log("Updating crop with request:", completeRequest);
       const updatedCrop = await updateCrop(id, completeRequest);
+      console.log("Received updated crop from API:", updatedCrop);
+
+      // Update the crop in state with the response from the API
       setCrops((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, ...updatedCrop } : c))
+        prev.map((c) => (c.id === id ? updatedCrop : c))
       );
-    } catch {
+    } catch (error) {
+      console.error("Failed to update crop:", error);
       alert("Failed to update crop.");
     }
   };

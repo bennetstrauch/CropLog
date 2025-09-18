@@ -5,6 +5,8 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
   const [editingCrop, setEditingCrop] = useState(null);
   const [editingName, setEditingName] = useState("");
   const [saveTimeout, setSaveTimeout] = useState(null);
+  const [sortField, setSortField] = useState("name");
+  const [sortDirection, setSortDirection] = useState("asc");
 
   const toggleSelection = (id) => {
     setSelectedIds((prev) =>
@@ -13,7 +15,7 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
   };
 
   const handleChange = (id, field, value) => {
-    onUpdateCrop(id, field, value); // optimistic update
+    onUpdateCrop(id, field, value);
   };
 
   const startEditingName = (crop) => {
@@ -85,6 +87,62 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
     }
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
+  const getSortedCrops = () => {
+    return [...crops].sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortField) {
+        case "name":
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case "measureUnit":
+          aValue = measureUnits.find(u => u.id === a.measureUnitId)?.name?.toLowerCase() || "";
+          bValue = measureUnits.find(u => u.id === b.measureUnitId)?.name?.toLowerCase() || "";
+          break;
+        case "category":
+          aValue = categories.find(c => c.id === a.categoryId)?.name?.toLowerCase() || "";
+          bValue = categories.find(c => c.id === b.categoryId)?.name?.toLowerCase() || "";
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const SortIcon = ({ field }) => {
+    if (sortField !== field) {
+      return (
+        <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      );
+    }
+
+    return sortDirection === "asc" ? (
+      <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+      </svg>
+    ) : (
+      <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    );
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <div className="px-6 py-4 border-b border-gray-200">
@@ -112,17 +170,35 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
-                  #
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                  id
+                </th> */}
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                  onClick={() => handleSort("name")}
+                >
+                  <div className="flex items-center gap-1">
+                    Crop Name
+                    <SortIcon field="name" />
+                  </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Crop Name
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                  onClick={() => handleSort("measureUnit")}
+                >
+                  <div className="flex items-center gap-1">
+                    Measure Unit
+                    <SortIcon field="measureUnit" />
+                  </div>
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Measure Unit
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none"
+                  onClick={() => handleSort("category")}
+                >
+                  <div className="flex items-center gap-1">
+                    Category
+                    <SortIcon field="category" />
+                  </div>
                 </th>
                 <th
                   className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider w-24 transition-all duration-200 ${
@@ -138,11 +214,12 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {crops.map((crop, index) => (
+              {getSortedCrops().map((crop, index) => (
                 <tr key={crop.id} className={`hover:bg-gray-50 transition-colors duration-150 ${selectedIds.includes(crop.id) ? 'bg-blue-50' : ''}`}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {/* uncimment this and th above to have id displayed */}
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {index + 1}
-                  </td>
+                  </td> */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     {editingCrop === crop.id ? (
                       <div className="flex items-center gap-2">
