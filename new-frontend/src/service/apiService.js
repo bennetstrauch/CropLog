@@ -1,10 +1,11 @@
 import axios from "axios";
+import { triggerLogout } from "./authUtils";
 // apiService.js
 
 // Create an Axios instance
 const API = axios.create({
-  baseURL: 'http://localhost:8080/api/',
-  // baseURL: "https://harvest-log.onrender.com/api/",
+  // baseURL: 'http://localhost:8080/api/',
+  baseURL: "https://harvest-log.onrender.com/api/",
 });
 
 // Use an interceptor to add the auth token to every request
@@ -21,6 +22,25 @@ API.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle token expiration
+API.interceptors.response.use(
+  (response) => {
+    // Return successful responses as-is
+    return response;
+  },
+  (error) => {
+    // Check if the error is due to authentication issues
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      console.log("Authentication error detected, logging out...");
+      // Trigger logout which will clear storage and redirect to login
+      triggerLogout();
+    }
+
+    // Re-throw the error so it can still be handled by the calling code
     return Promise.reject(error);
   }
 );
