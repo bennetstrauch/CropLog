@@ -133,6 +133,18 @@ export async function postHarvestRecord(entry) {
   return response.id;
 }
 
+export async function updateHarvestRecord(id, data) {
+  return await put(`harvest-record/${id}`, data);
+}
+
+export async function deleteHarvestRecord(id) {
+  return await deleteRequest(`harvest-record/${id}`);
+}
+
+export async function deleteHarvestRecords(ids) {
+  return Promise.all(ids.map(id => deleteHarvestRecord(id)));
+}
+
 
 
 // You'll also need auth-specific calls

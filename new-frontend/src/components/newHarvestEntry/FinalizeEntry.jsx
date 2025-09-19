@@ -5,10 +5,12 @@ import SelectFields from "../harvestFields/SelectFields";
 import { getCurrentDate } from "../../service/utils";
 import { post, postHarvestRecord } from "../../service/apiService";
 import GoBackButton from "../universal/GoBackButton";
+import { useNotification } from "../../context/NotificationContext";
 
 const FinalizeEntry = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
+  const { showNotification } = useNotification();
 
   // Add a safety check in case someone navigates to this URL directly
   if (!state) {
@@ -54,13 +56,18 @@ const FinalizeEntry = () => {
   //   console.log("added Entry", addedEntry);
   // }
 
-  const handleEntrySubmission = () => {
+  const handleEntrySubmission = async () => {
     const newEntry = prepareEntry();
     console.log("Submitting new entry:", newEntry);
-    const addedEntryId = postHarvestRecord(newEntry);
-    // getLatestEntry(addedEntryId);
 
-    goBack();
+    try {
+      const addedEntryId = await postHarvestRecord(newEntry);
+      showNotification("Entry saved!");
+      goBack();
+    } catch (error) {
+      console.error("Failed to submit entry:", error);
+      alert("Failed to submit harvest entry.");
+    }
   };
 
   const submitEntry_Button = (
@@ -73,7 +80,6 @@ const FinalizeEntry = () => {
 
   return (
     <div>
-      finalizeEntry
       <br />
       <GoBackButton />
       <br /> <br />

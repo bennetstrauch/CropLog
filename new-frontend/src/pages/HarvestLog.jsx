@@ -5,6 +5,7 @@ import { calculateDateRange, getCurrentDate } from '../service/utils';
 import DateRangeDiv from '../components/harvestLog/DateRangeDiv';
 import TimeframeNav, { defaultTimeframe } from '../components/harvestLog/TimeframeNav';
 import HarvestLogTable from '../components/harvestLog/HarvestLogTable';
+import HarvestLogTableRefactored from '../components/harvestLog/HarvestLogTableRefactored';
 
 const HarvestLog = () => {
   // ## impl. other criteriaqueri predicats: filter by (crop, field,)
@@ -27,7 +28,7 @@ const HarvestLog = () => {
         <TimeframeNav {...{setDateRange}} />
         <br />
 
-        <HarvestLogTable {...{dateRange}} />
+        <HarvestLogTableRefactored {...{dateRange}} />
 
 
     </div>

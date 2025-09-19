@@ -102,7 +102,7 @@ src/
 ## Key Components
 
 ### Main Pages
-- **MainPage** (`src/pages/MainPage.jsx`) - Primary harvest entry interface
+- **MainPageRefactored** (`src/pages/MainPageRefactored.jsx`) - Primary harvest entry interface
 - **HarvestLog** (`src/pages/HarvestLog.jsx`) - Historical data viewer
 
 ### Core Features

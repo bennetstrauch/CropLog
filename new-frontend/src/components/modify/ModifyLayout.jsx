@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
+import GoBackButton from "../universal/GoBackButton";
 
 const ModifyLayout = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const ModifyLayout = () => {
   return (
     <div>
       <div className="navbar">
+        <GoBackButton />
         <button
           className={isActive("crops") ? "active" : ""}
           onClick={() => navigate("/modify/crops")}

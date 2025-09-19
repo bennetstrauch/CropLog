@@ -10,7 +10,6 @@ import ModifyLayout from "../components/modify/ModifyLayout";
 // Pages
 import Login from "../authentification/Login";
 import Register from "../authentification/Register";
-import MainPage from "../pages/MainPage";
 import MainPageRefactored from "../pages/MainPageRefactored";
 import HarvestLog from "../pages/HarvestLog";
 import NotFoundPage from "../pages/NotFoundPage"; // A component for 404 errors
