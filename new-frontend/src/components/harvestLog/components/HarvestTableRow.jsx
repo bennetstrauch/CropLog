@@ -37,9 +37,7 @@ const HarvestTableRow = ({
     ? 'bg-blue-50 hover:bg-blue-100'
     : isToday(entry.harvestDate)
       ? 'bg-green-50 hover:bg-green-100'
-      : index % 2 === 0
-        ? 'bg-white hover:bg-gray-50'
-        : 'bg-yellow-50 hover:bg-yellow-100';
+      : 'bg-white hover:bg-yellow-100';
 
   return (
     <tr className={`transition-colors duration-150 ${rowBgClass}`}>
@@ -62,7 +60,7 @@ const HarvestTableRow = ({
       </td>
 
       {/* Crop Column */}
-      <td className="px-6 py-4 whitespace-nowrap" style={{width: '30%'}}>
+      <td className="px-6 py-4 whitespace-nowrap" style={{width: '50%'}}>
         <EditableField
           value={entry.cropId}
           field="cropId"

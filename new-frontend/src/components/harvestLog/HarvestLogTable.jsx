@@ -241,7 +241,7 @@ const HarvestLogTable = ({ dateRange }) => {
                   onSort={tableState.handleSort}
                   className="w-20"
                 >
-                  Quantity
+                  Qty
                 </SortableHeader>
                 <SortableHeader sortable={false}>
                   Unit

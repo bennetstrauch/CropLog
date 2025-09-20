@@ -11,8 +11,10 @@ import { useNotification } from "../../context/NotificationContext";
 import HarvestTableHeader from "./components/HarvestTableHeader";
 import HarvestTableRow from "./components/HarvestTableRow";
 import FieldSelectionModal from "./components/FieldSelectionModal";
+import TimeframeNav from "./TimeframeNav";
+import DateRangeDiv from "./DateRangeDiv";
 
-const HarvestLogTableRefactored = ({ dateRange }) => {
+const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
   // State
   const [harvestEntries, setHarvestEntries] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -144,14 +146,22 @@ const HarvestLogTableRefactored = ({ dateRange }) => {
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-center gap-3">
-          <h2 className="text-lg font-semibold text-gray-900">Harvest Log</h2>
-          {sortedEntries.length > 0 && (
-            <span className="text-sm text-gray-500">
-              {sortedEntries.length} entr{sortedEntries.length !== 1 ? 'ies' : 'y'} total
-              {selectedIds.length > 0 && ` • ${selectedIds.length} selected`}
-            </span>
-          )}
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold text-gray-900">Harvest Log</h2>
+              {sortedEntries.length > 0 && (
+                <span className="text-sm text-gray-500">
+                  {sortedEntries.length} entr{sortedEntries.length !== 1 ? 'ies' : 'y'} total
+                  {selectedIds.length > 0 && ` • ${selectedIds.length} selected`}
+                </span>
+              )}
+            </div>
+            <div className="mt-2">
+              <DateRangeDiv {...dateRange} />
+            </div>
+          </div>
+          <TimeframeNav setDateRange={setDateRange} />
         </div>
       </div>
 
@@ -168,7 +178,7 @@ const HarvestLogTableRefactored = ({ dateRange }) => {
         </div>
       ) : (
         <div className="overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200" style={{tableLayout: 'fixed'}}>
             <HarvestTableHeader
               sortField={sortField}
               sortDirection={sortDirection}

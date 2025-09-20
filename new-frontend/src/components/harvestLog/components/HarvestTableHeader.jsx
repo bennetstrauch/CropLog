@@ -25,8 +25,10 @@ const HarvestTableHeader = ({
           currentSort={sortField}
           direction={sortDirection}
           onSort={onSort}
+          // className="w-40"
+          style={{width: '50%'}}
         >
-          Crop
+          Cropname
         </SortableHeader>
 
         <SortableHeader
@@ -35,7 +37,7 @@ const HarvestTableHeader = ({
           direction={sortDirection}
           onSort={onSort}
         >
-          Quantity
+          Qnty
         </SortableHeader>
 
         <SortableHeader sortable={false}>

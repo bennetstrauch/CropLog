@@ -87,7 +87,7 @@ div.latestEntry {
   font-weight: 400;
   color: gray; /* Default color */
   cursor: pointer;
-  padding: 10;
+  padding: 0;
 }
 
 .navbar button.active {
@@ -113,8 +113,7 @@ div.latestEntry {
 
 .timeframe-navigation {
   display: flex;
-  justify-content: center; /* Center the buttons */
-  
+  justify-content: center; /* Center the buttons */ 
 }
 
 

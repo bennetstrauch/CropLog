@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-const SortableHeader = ({ field, currentSort, direction, onSort, children, sortable = true, className = '' }) => {
+const SortableHeader = ({ field, currentSort, direction, onSort, children, sortable = true, className = '', style = {} }) => {
   const isActive = currentSort === field;
 
   const SortIcon = () => {
@@ -32,6 +32,7 @@ const SortableHeader = ({ field, currentSort, direction, onSort, children, sorta
           ? 'cursor-pointer hover:bg-gray-100 transition-colors select-none'
           : ''
       } ${className}`}
+      style={style}
       onClick={sortable ? () => onSort(field) : undefined}
     >
       <div className="flex items-center gap-1">

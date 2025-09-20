@@ -57,7 +57,7 @@ const DateRangeDiv = ({startDate, endDate}) => {
     const formattedRange = formatDateRange(startDate, endDate);
 
     return (
-        <div>
+        <div className="text-teal-600">
             {formattedRange}
         </div>
     )

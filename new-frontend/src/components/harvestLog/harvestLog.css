@@ -8,7 +8,7 @@
   font-weight: 400;
   color: gray; /* Default color */
   cursor: pointer;
-  padding: 10;
+  padding: 1px 12px;
 }
 
 .navbar button.active {

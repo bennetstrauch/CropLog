@@ -18,17 +18,11 @@ const HarvestLog = () => {
   
 
   return (
-    <div>HarvestLog
+    <div>
         <GoBackButton />
         <br />
 
-        <DateRangeDiv {...dateRange} />
-        <br />
-
-        <TimeframeNav {...{setDateRange}} />
-        <br />
-
-        <HarvestLogTableRefactored {...{dateRange}} />
+        <HarvestLogTableRefactored dateRange={dateRange} setDateRange={setDateRange} />
 
 
     </div>
