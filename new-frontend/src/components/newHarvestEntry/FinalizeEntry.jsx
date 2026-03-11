@@ -1,5 +1,6 @@
 import React, { useContext, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Path_Modify } from "../../routes/AppRouter";
 import QuantityInput from "./QuantityInput";
 import SelectFields from "../harvestFields/SelectFields";
 import { getCurrentDate } from "../../service/utils";
@@ -25,7 +26,7 @@ const FinalizeEntry = () => {
     "RENDER FinalizeEntry,   harvestedCrop",
     harvestedCrop,
     "harvestedFields",
-    harvestedFieldsRef
+    harvestedFieldsRef,
   );
 
   const harvestedQuantity = useRef(0.0);
@@ -70,24 +71,19 @@ const FinalizeEntry = () => {
     }
   };
 
-  const submitEntry_Button = (
-    <button onClick={handleEntrySubmission}>Submit</button>
-  );
-  // //#
-  // const modifyFieldsButton = (
-  //   <button onClick={navigateTo(Path_ModifyCrops)}>Modify Fields</button>
-  // );
-
   return (
     <div>
       <br />
       <GoBackButton />
+      &nbsp;&nbsp;
+      <button onClick={() => navigate(Path_Modify + "/fields")}>
+        Modify Fields
+      </button>
       <br /> <br />
       <QuantityInput {...{ harvestedQuantity, harvestedCrop }} />
       <SelectFields {...{ harvestedFieldsRef, harvestedCrop }} />
       <br />
-      {submitEntry_Button}
-      {/* {modifyFieldsButton} */}
+      <button onClick={handleEntrySubmission}>Submit</button>
     </div>
   );
 };

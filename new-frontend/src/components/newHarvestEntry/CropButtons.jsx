@@ -20,7 +20,8 @@ function CropButtons({ harvestDate, harvestedFieldsRef }) {
 
   return (
     <div>
-      {mapToHTML(crops, (crop) => (
+      {mapToHTML(crops.filter(c => c.active), (crop) => (
+        
         <button key={crop.id} onClick={() => handleClick(crop)}>
           {" "}
           {crop.name}{" "}
