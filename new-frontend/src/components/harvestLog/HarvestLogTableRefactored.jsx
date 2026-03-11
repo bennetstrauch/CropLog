@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getEntriesFilteredBy } from "../../service/apiService";
 import { useCrops } from "../../context/CropsProvider";
 import { useFields } from "../../context/FieldsProvider";
@@ -15,6 +16,9 @@ import TimeframeNav from "./TimeframeNav";
 import DateRangeDiv from "./DateRangeDiv";
 
 const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
+  // Navigation
+  const navigate = useNavigate();
+
   // State
   const [harvestEntries, setHarvestEntries] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -143,22 +147,34 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
   const isToday = (date) => getCurrentDate() === date;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="bg-white w-full h-full min-h-screen">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200">
+      <div className="px-4 py-4 border-b border-gray-200">
         <div className="flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-gray-900">Harvest Log</h2>
-              {sortedEntries.length > 0 && (
-                <span className="text-sm text-gray-500">
-                  {sortedEntries.length} entr{sortedEntries.length !== 1 ? 'ies' : 'y'} total
-                  {selectedIds.length > 0 && ` • ${selectedIds.length} selected`}
-                </span>
-              )}
-            </div>
-            <div className="mt-2">
-              <DateRangeDiv {...dateRange} />
+            <div className="flex items-start gap-3">
+              <button
+                onClick={() => navigate('/')}
+                className="text-gray-500 hover:text-gray-700 transition-colors duration-200 text-2xl"
+                style={{ background: 'none', border: 'none', padding: 0, marginTop: 4, borderRadius: 0, fontWeight: 'bold', textShadow: '0.5px 0 0 currentColor' }}
+                title="Back to main page"
+              >
+                🡄
+              </button>
+              <div>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-semibold text-gray-900">Harvest Log</h2>
+                  {sortedEntries.length > 0 && (
+                    <span className="text-sm text-gray-500">
+                      {sortedEntries.length} entr{sortedEntries.length !== 1 ? 'ies' : 'y'} total
+                      {selectedIds.length > 0 && ` • ${selectedIds.length} selected`}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <DateRangeDiv {...dateRange} />
+                </div>
+              </div>
             </div>
           </div>
           <TimeframeNav setDateRange={setDateRange} />

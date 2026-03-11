@@ -9,6 +9,9 @@ import java.util.Optional;
 
 public interface ICropService {
     List<CropResponse> getAll(Long farmerId);
+    List<CropResponse> getAllActive(Long farmerId);
+    List<CropResponse> getAllInactive(Long farmerId);
+    List<CropResponse> getAll(Long farmerId, Boolean active);
     Optional<CropResponse> getById(Long id, Long farmerId);
     CropResponse create(CropRequest request, Long farmerId);
     List<CropResponse> createBatch(List<CropRequest> requests, Long farmerId);

@@ -20,6 +20,7 @@ const CategorySection = () => {
 
       const updateData = {
         name: field === "name" ? value : currentCategory.name,
+        active: field === "active" ? value : currentCategory.active,
       };
 
       const updatedCategory = await updateCategory(id, updateData);
@@ -65,6 +66,7 @@ const CategorySection = () => {
         sortable={['name']}
         defaultSort="name"
         emptyMessage="No categories yet"
+        showActiveColumn={true}
       />
     </div>
   );

@@ -9,6 +9,9 @@ import java.util.Optional;
 public interface IFieldService {
 
     List<FieldResponse> getAllForFarmer(Long farmerId);
+    List<FieldResponse> getActiveForFarmer(Long farmerId);
+    List<FieldResponse> getInactiveForFarmer(Long farmerId);
+    List<FieldResponse> getAllForFarmer(Long farmerId, Boolean active);
 
     Optional<FieldResponse> getById(Long id, Long farmerId);
 

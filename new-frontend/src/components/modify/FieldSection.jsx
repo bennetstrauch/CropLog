@@ -32,6 +32,7 @@ const FieldSection = () => {
 
       const updateData = {
         name: field === "name" ? value : currentField.name,
+        active: field === "active" ? value : currentField.active,
       };
 
       const updatedField = await updateField(id, updateData);
@@ -77,6 +78,7 @@ const FieldSection = () => {
         sortable={['name']}
         defaultSort="name"
         emptyMessage="No fields yet"
+        showActiveColumn={true}
       />
     </div>
   );

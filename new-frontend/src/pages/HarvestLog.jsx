@@ -1,10 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import GoBackButton from '../components/universal/GoBackButton';
 import { calculateDateRange, getCurrentDate } from '../service/utils';
-import DateRangeDiv from '../components/harvestLog/DateRangeDiv';
 import TimeframeNav, { defaultTimeframe } from '../components/harvestLog/TimeframeNav';
-import HarvestLogTable from '../components/harvestLog/HarvestLogTable';
 import HarvestLogTableRefactored from '../components/harvestLog/HarvestLogTableRefactored';
 
 const HarvestLog = () => {
@@ -18,13 +15,8 @@ const HarvestLog = () => {
   
 
   return (
-    <div>
-        <GoBackButton />
-        <br />
-
+    <div className="min-h-screen w-full p-0 m-0 fixed inset-0 bg-white">
         <HarvestLogTableRefactored dateRange={dateRange} setDateRange={setDateRange} />
-
-
     </div>
   )
 }

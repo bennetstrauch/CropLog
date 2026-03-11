@@ -22,9 +22,11 @@ public class FieldController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FieldResponse>> getAllFields() {
+    public ResponseEntity<List<FieldResponse>> getAllFields(
+            @RequestParam(required = false) Boolean active
+    ) {
         Long farmerId = getAuthenticatedFarmerId();
-        return ResponseEntity.ok(fieldService.getAllForFarmer(farmerId));
+        return ResponseEntity.ok(fieldService.getAllForFarmer(farmerId, active));
     }
 
     @GetMapping("/{id}")

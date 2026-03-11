@@ -11,7 +11,7 @@ const ModifyLayout = () => {
   return (
     <div>
       <div className="navbar">
-        <GoBackButton />
+        <GoBackButton toMainPage={true} />
         <button
           className={isActive("crops") ? "active" : ""}
           onClick={() => navigate("/modify/crops")}

@@ -62,6 +62,7 @@ const CropSection = () => {
         name: field === "name" ? value : currentCrop.name,
         measureUnitId: field === "measureUnitId" ? value : currentCrop.measureUnitId,
         categoryId: field === "categoryId" ? value : currentCrop.categoryId,
+        active: field === "active" ? value : currentCrop.active,
       };
 
       console.log("Updating crop with request:", completeRequest);

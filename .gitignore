@@ -1,0 +1,15 @@
+# Environment variables
+.env
+backend/.env
+
+# IDE files
+.vscode/settings.json
+.idea/
+
+# Build artifacts
+backend/target/
+new-frontend/node_modules/
+new-frontend/dist/
+
+# Logs
+*.log

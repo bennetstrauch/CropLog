@@ -25,9 +25,11 @@ public class CropController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CropResponse>> getAll() {
+    public ResponseEntity<List<CropResponse>> getAll(
+            @RequestParam(required = false) Boolean active
+    ) {
         Long farmerId = getAuthenticatedFarmerId();
-        return ResponseEntity.ok(cropService.getAll(farmerId));
+        return ResponseEntity.ok(cropService.getAll(farmerId, active));
     }
 
     @GetMapping("/{id}")

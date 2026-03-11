@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot App",
+            "request": "launch",
+            "mainClass": "harvestLog.App",
+            "projectName": "Project-HarvestLog",
+            "env": {
+                "OPENAI_API_KEY": "OPENAI_API_KEY_REMOVED",
+                "DB_URL": "jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require",
+                "DB_USERNAME": "postgres.alitamacelzglkdfuojd",
+                "DB_PASSWORD": "ciB55-net"
+            }
+        }
+    ]
+}

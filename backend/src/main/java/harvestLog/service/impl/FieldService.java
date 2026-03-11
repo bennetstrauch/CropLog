@@ -2,11 +2,13 @@ package harvestLog.service.impl;
 
 import harvestLog.dto.FieldRequest;
 import harvestLog.dto.FieldResponse;
+import harvestLog.exception.AlreadyExistsException;
 import harvestLog.model.Farmer;
 import harvestLog.model.Field;
 import harvestLog.repository.FarmerRepository;
 import harvestLog.repository.FieldRepository;
 import harvestLog.service.IFieldService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,28 @@ public class FieldService implements IFieldService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<FieldResponse> getActiveForFarmer(Long farmerId) {
+        return fieldRepo.findByFarmerIdAndActive(farmerId, true).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<FieldResponse> getInactiveForFarmer(Long farmerId) {
+        return fieldRepo.findByFarmerIdAndActive(farmerId, false).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<FieldResponse> getAllForFarmer(Long farmerId, Boolean active) {
+        if (active == null) {
+            return getAllForFarmer(farmerId);
+        }
+        return active ? getActiveForFarmer(farmerId) : getInactiveForFarmer(farmerId);
+    }
+
 //    ##
     public Optional<FieldResponse> getById(Long id, Long farmerId) {
         return fieldRepo.findById(id)
@@ -39,9 +63,25 @@ public class FieldService implements IFieldService {
 
     @Transactional
     public FieldResponse create(FieldRequest request, Long farmerId) {
-        Field field = toEntity(request, farmerId);
-        Field saved = fieldRepo.save(field);
-        return toResponse(saved);
+        try {
+            Field field = toEntity(request, farmerId);
+            Field saved = fieldRepo.save(field);
+            return toResponse(saved);
+        } catch (DataIntegrityViolationException e) {
+            return handleDuplicateField(request, farmerId);
+        }
+    }
+
+    private FieldResponse handleDuplicateField(FieldRequest request, Long farmerId) {
+        Optional<Field> existing = fieldRepo.findByNameIgnoreCaseAndFarmerId(request.name(), farmerId);
+
+        if (existing.isPresent() && !existing.get().isActive()) {
+            Field field = existing.get();
+            field.setActive(true);
+            return toResponse(fieldRepo.save(field));
+        }
+
+        throw new AlreadyExistsException("Active field with name '" + request.name() + "' already exists");
     }
 
     @Transactional
@@ -49,19 +89,19 @@ public class FieldService implements IFieldService {
         return fieldRepo.findById(id)
                 .filter(field -> field.getFarmer().getId().equals(farmerId))
                 .map(field -> {
-                    field.setName(request.name());
+                    if (request.name() != null) {
+                        field.setName(request.name());
+                    }
+                    if (request.active() != null) {
+                        field.setActive(request.active());
+                    }
                     return toResponse(fieldRepo.save(field));
                 });
     }
 
     @Transactional
     public boolean delete(Long id, Long farmerId) {
-        Optional<Field> field = fieldRepo.findById(id);
-        if (field.isPresent() && field.get().getFarmer().getId().equals(farmerId)) {
-            fieldRepo.deleteById(id);
-            return true;
-        }
-        return false;
+        return fieldRepo.softDeleteByIdInAndFarmerId(List.of(id), farmerId) > 0;
     }
 
     @Transactional
@@ -89,7 +129,7 @@ public class FieldService implements IFieldService {
         if (ids == null || ids.isEmpty()) {
             return 0;
         }
-        return fieldRepo.deleteByIdInAndFarmerId(ids, farmerId);
+        return fieldRepo.softDeleteByIdInAndFarmerId(ids, farmerId);
     }
 
     private Field toEntity(FieldRequest request, Long farmerId) {
@@ -98,6 +138,7 @@ public class FieldService implements IFieldService {
         Field field = new Field();
         field.setName(request.name());
         field.setFarmer(farmer);
+        field.setActive(request.active() != null ? request.active() : true);
         return field;
     }
 
@@ -105,7 +146,8 @@ public class FieldService implements IFieldService {
         return new FieldResponse(
                 field.getId(),
                 field.getName(),
-                field.getFarmer().getId()
+                field.getFarmer().getId(),
+                field.isActive()
         );
     }
 }

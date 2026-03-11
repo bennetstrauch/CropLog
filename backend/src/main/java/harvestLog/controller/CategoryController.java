@@ -24,9 +24,11 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
+    public ResponseEntity<List<CategoryResponse>> getAllCategories(
+            @RequestParam(required = false) Boolean active
+    ) {
         Long farmerId = getAuthenticatedFarmerId();
-        return ResponseEntity.ok(categoryService.getAll(farmerId));
+        return ResponseEntity.ok(categoryService.getAllForFarmerId(farmerId, active));
     }
 
     @GetMapping("/{id}")
@@ -45,10 +47,10 @@ public class CategoryController {
     }
 
     @PostMapping("/batch")
-    public List<CategoryResponse> createCategories(
-            @RequestBody List<CategoryRequest> categoryRequests) {
+    public ResponseEntity<List<CategoryResponse>> createBatch(@Valid @RequestBody List<CategoryRequest> requests) {
         Long farmerId = getAuthenticatedFarmerId();
-        return categoryService.createBatch(categoryRequests, farmerId);
+        List<CategoryResponse> created = categoryService.createBatch(requests, farmerId);
+        return ResponseEntity.status(201).body(created);
     }
 
 

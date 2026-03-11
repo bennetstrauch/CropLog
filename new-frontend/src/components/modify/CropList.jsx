@@ -98,6 +98,9 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
 
   const getSortedCrops = () => {
     return [...crops].sort((a, b) => {
+      // Active always comes first, regardless of other sorting
+      if (a.active !== b.active) return a.active ? -1 : 1;
+
       let aValue, bValue;
 
       switch (sortField) {
@@ -172,9 +175,9 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
-                  id
-                </th> */}
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                  Active
+                </th>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none"
                   onClick={() => handleSort("name")}
@@ -223,11 +226,19 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
                     : index % 2 === 0
                       ? 'bg-white hover:bg-gray-50'
                       : 'bg-yellow-50 hover:bg-yellow-100'
-                }`}>
-                  {/* uncimment this and th above to have id displayed */}
-                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {index + 1}
-                  </td> */}
+                } ${!crop.active && !selectedIds.includes(crop.id) ? 'opacity-60' : ''}`}>
+                  <td className="px-4 py-4 whitespace-nowrap text-center">
+                    <button
+                      onClick={() => handleChange(crop.id, "active", !crop.active)}
+                      title={crop.active ? 'Active — click to deactivate' : 'Inactive — click to activate'}
+                      className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none border-0 p-0"
+                      style={{ backgroundColor: crop.active ? '#22c55e' : '#d1d5db' }}
+                    >
+                      <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+                        crop.active ? 'translate-x-5' : 'translate-x-1'
+                      }`} />
+                    </button>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {editingCrop === crop.id ? (
                       <div className="flex items-center gap-2">

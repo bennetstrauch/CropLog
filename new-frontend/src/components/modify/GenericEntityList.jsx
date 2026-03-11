@@ -9,7 +9,8 @@ const GenericEntityList = ({
   sortable = [],
   defaultSort = null,
   emptyMessage = "No items yet",
-  emptyIcon = null
+  emptyIcon = null,
+  showActiveColumn = false,
 }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [editingEntity, setEditingEntity] = useState(null);
@@ -109,14 +110,15 @@ const GenericEntityList = ({
     if (!sortField) return entities;
 
     return [...entities].sort((a, b) => {
-      let aValue = a[sortField];
-      let bValue = b[sortField];
+      if (sortField === "active") {
+        const aVal = a.active === true ? 1 : 0;
+        const bVal = b.active === true ? 1 : 0;
+        return sortDirection === "asc" ? bVal - aVal : aVal - bVal;
+      }
 
-      // Handle null/undefined values
-      if (aValue == null) aValue = "";
-      if (bValue == null) bValue = "";
+      let aValue = a[sortField] ?? "";
+      let bValue = b[sortField] ?? "";
 
-      // Convert to string for comparison
       aValue = String(aValue).toLowerCase();
       bValue = String(bValue).toLowerCase();
 
@@ -232,6 +234,17 @@ const GenericEntityList = ({
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                {showActiveColumn && (
+                  <th
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors select-none w-16"
+                    onClick={() => handleSort("active")}
+                  >
+                    <div className="flex items-center gap-1">
+                      Active
+                      <SortIcon fieldKey="active" />
+                    </div>
+                  </th>
+                )}
                 {fields.map((field) => (
                   <th
                     key={field.key}
@@ -269,7 +282,21 @@ const GenericEntityList = ({
                     : index % 2 === 0
                       ? 'bg-white hover:bg-gray-50'
                       : 'bg-yellow-50 hover:bg-yellow-100'
-                }`}>
+                } ${showActiveColumn && !entity.active && !selectedIds.includes(entity.id) ? 'opacity-60' : ''}`}>
+                  {showActiveColumn && (
+                    <td className="px-4 py-4 whitespace-nowrap text-center">
+                      <button
+                        onClick={() => onUpdate(entity.id, 'active', !entity.active)}
+                        title={entity.active ? 'Active — click to deactivate' : 'Inactive — click to activate'}
+                        className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none border-0 p-0"
+                        style={{ backgroundColor: entity.active ? '#22c55e' : '#d1d5db' }}
+                      >
+                        <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+                          entity.active ? 'translate-x-5' : 'translate-x-1'
+                        }`} />
+                      </button>
+                    </td>
+                  )}
                   {fields.map((field) => (
                     <td key={field.key} className="px-6 py-4 whitespace-nowrap">
                       {renderField(entity, field, index)}

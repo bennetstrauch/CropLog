@@ -3,7 +3,11 @@
     "allow": [
       "Read(//c/Users/strau/OneDrive/Desktop/**)",
       "Read(//c/Users/strau/OneDrive/[B] Bilder/Screenshots/**)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(mvn clean:*)",
+      "Bash(mvn:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

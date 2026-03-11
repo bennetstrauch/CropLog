@@ -1,43 +1,139 @@
 package harvestLog.service.impl;
 
-import harvestLog.exception.EntityNotFoundException;
+import harvestLog.dto.MeasureUnitRequest;
+import harvestLog.dto.MeasureUnitResponse;
+import harvestLog.exception.AlreadyExistsException;
+import harvestLog.model.Farmer;
 import harvestLog.model.MeasureUnit;
+import harvestLog.repository.FarmerRepository;
 import harvestLog.repository.MeasureUnitRepository;
 import harvestLog.service.IMeasureUnitService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MeasureUnitService implements IMeasureUnitService {
 
-    @Autowired
-    private MeasureUnitRepository repository;
+    private final MeasureUnitRepository repository;
+    private final FarmerRepository farmerRepository;
 
-
-    @Override
-    public List<MeasureUnit> getAllForFarmerId(long farmerId) {
-        return repository.findAllByFarmer_Id(farmerId);
+    public MeasureUnitService(MeasureUnitRepository repository, FarmerRepository farmerRepository) {
+        this.repository = repository;
+        this.farmerRepository = farmerRepository;
     }
 
-
+    @Override
+    public List<MeasureUnitResponse> getAllForFarmerId(Long farmerId) {
+        return repository.findAllByFarmer_Id(farmerId).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
 
     @Override
-    public MeasureUnit getById(Long id) {
+    public List<MeasureUnitResponse> getActiveForFarmerId(Long farmerId) {
+        return repository.findByFarmerIdAndActive(farmerId, true).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MeasureUnitResponse> getInactiveForFarmerId(Long farmerId) {
+        return repository.findByFarmerIdAndActive(farmerId, false).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MeasureUnitResponse> getAllForFarmerId(Long farmerId, Boolean active) {
+        if (active == null) {
+            return getAllForFarmerId(farmerId);
+        }
+        return active ? getActiveForFarmerId(farmerId) : getInactiveForFarmerId(farmerId);
+    }
+
+    @Override
+    public Optional<MeasureUnitResponse> getById(Long id, Long farmerId) {
         return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Measure Unit not found"));
+                .filter(unit -> unit.getFarmer().getId().equals(farmerId))
+                .map(this::toResponse);
     }
 
     @Override
-    public MeasureUnit save(MeasureUnit unit) {
-        return repository.save(unit);
+    @Transactional
+    public MeasureUnitResponse create(MeasureUnitRequest request, Long farmerId) {
+        try {
+            MeasureUnit unit = toEntity(request, farmerId);
+            MeasureUnit saved = repository.save(unit);
+            return toResponse(saved);
+        } catch (DataIntegrityViolationException e) {
+            return handleDuplicateUnit(request, farmerId);
+        }
+    }
+
+    private MeasureUnitResponse handleDuplicateUnit(MeasureUnitRequest request, Long farmerId) {
+        Optional<MeasureUnit> existing = repository.findByNameIgnoreCaseAndFarmerId(request.name(), farmerId);
+
+        if (existing.isPresent() && !existing.get().isActive()) {
+            MeasureUnit unit = existing.get();
+            unit.setActive(true);
+            if (request.abbreviation() != null) {
+                unit.setAbbreviation(request.abbreviation());
+            }
+            return toResponse(repository.save(unit));
+        }
+
+        throw new AlreadyExistsException("Active measure unit with name '" + request.name() + "' already exists");
     }
 
     @Override
-    public void deleteById(Long id) {
-        repository.deleteById(id);
+    @Transactional
+    public List<MeasureUnitResponse> createBatch(List<MeasureUnitRequest> requests, Long farmerId) {
+        Farmer farmer = farmerRepository.findById(farmerId)
+                .orElseThrow(() -> new IllegalArgumentException("Farmer not found: " + farmerId));
+
+        List<MeasureUnit> units = requests.stream()
+                .map(request -> {
+                    MeasureUnit unit = new MeasureUnit();
+                    unit.setName(request.name());
+                    unit.setAbbreviation(request.abbreviation());
+                    unit.setFarmer(farmer);
+                    unit.setActive(request.active() != null ? request.active() : true);
+                    return unit;
+                })
+                .collect(Collectors.toList());
+
+        List<MeasureUnit> saved = repository.saveAll(units);
+        return saved.stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public Optional<MeasureUnitResponse> update(Long id, MeasureUnitRequest request, Long farmerId) {
+        return repository.findById(id)
+                .filter(unit -> unit.getFarmer().getId().equals(farmerId))
+                .map(unit -> {
+                    if (request.name() != null) {
+                        unit.setName(request.name());
+                    }
+                    if (request.abbreviation() != null) {
+                        unit.setAbbreviation(request.abbreviation());
+                    }
+                    if (request.active() != null) {
+                        unit.setActive(request.active());
+                    }
+                    return toResponse(repository.save(unit));
+                });
+    }
+
+    @Override
+    @Transactional
+    public boolean delete(Long id, Long farmerId) {
+        return repository.softDeleteByIdInAndFarmerId(List.of(id), farmerId) > 0;
     }
 
     @Override
@@ -46,7 +142,27 @@ public class MeasureUnitService implements IMeasureUnitService {
         if (ids == null || ids.isEmpty()) {
             return 0;
         }
-        return repository.deleteByIdInAndFarmerId(ids, farmerId);
+        return repository.softDeleteByIdInAndFarmerId(ids, farmerId);
     }
 
+    private MeasureUnit toEntity(MeasureUnitRequest request, Long farmerId) {
+        Farmer farmer = farmerRepository.findById(farmerId)
+                .orElseThrow(() -> new IllegalArgumentException("Farmer not found: " + farmerId));
+
+        MeasureUnit unit = new MeasureUnit();
+        unit.setName(request.name());
+        unit.setAbbreviation(request.abbreviation());
+        unit.setFarmer(farmer);
+        unit.setActive(request.active() != null ? request.active() : true);
+        return unit;
+    }
+
+    private MeasureUnitResponse toResponse(MeasureUnit unit) {
+        return new MeasureUnitResponse(
+                unit.getId(),
+                unit.getName(),
+                unit.getAbbreviation(),
+                unit.isActive()
+        );
+    }
 }

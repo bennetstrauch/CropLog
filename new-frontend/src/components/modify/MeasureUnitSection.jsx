@@ -22,6 +22,7 @@ const MeasureUnitSection = () => {
       const updateData = {
         name: field === "name" ? value : currentUnit.name,
         abbreviation: field === "abbreviation" ? value : currentUnit.abbreviation,
+        active: field === "active" ? value : currentUnit.active,
       };
 
       const updatedUnit = await updateMeasureUnit(id, updateData);
@@ -74,6 +75,7 @@ const MeasureUnitSection = () => {
         sortable={['name', 'abbreviation']}
         defaultSort="name"
         emptyMessage="No measure units yet"
+        showActiveColumn={true}
       />
     </div>
   );
