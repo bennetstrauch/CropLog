@@ -11,6 +11,7 @@ import { useNotification } from "../../context/NotificationContext";
 // Components
 import HarvestTableHeader from "./components/HarvestTableHeader";
 import HarvestTableRow from "./components/HarvestTableRow";
+import SortableHeader from "./components/SortableHeader";
 import FieldSelectionModal from "./components/FieldSelectionModal";
 import TimeframeNav from "./TimeframeNav";
 import DateRangeDiv from "./DateRangeDiv";
@@ -31,6 +32,8 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
     selectedFieldIds: []
   });
   const [isSummaryMode, setIsSummaryMode] = useState(false);
+  const [summarySortField, setSummarySortField] = useState('cropName');
+  const [summarySortDirection, setSummarySortDirection] = useState('asc');
   const [isCustomMode, setIsCustomMode] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
 
@@ -57,6 +60,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
       harvestDate: entry.date,
       cropId: entry.cropId,
       cropName: crop?.name || "Unknown Crop",
+      categoryName: crop?.categoryName || "",
       quantity: entry.harvestedQuantity,
       measureUnitName: measureUnitDisplay,
       harvestedFieldNames: fieldNames,
@@ -86,6 +90,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
         acc[entry.cropId] = {
           cropId: entry.cropId,
           cropName: entry.cropName,
+          categoryName: entry.categoryName,
           totalQuantity: 0,
           measureUnitName: entry.measureUnitName,
           fieldNames: new Set(),
@@ -99,7 +104,14 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
     }, {})
   )
     .map(s => ({ ...s, fieldNames: [...s.fieldNames].sort() }))
-    .sort((a, b) => a.cropName.localeCompare(b.cropName));
+    .sort((a, b) => {
+      const aVal = a[summarySortField];
+      const bVal = b[summarySortField];
+      const cmp = typeof aVal === 'string'
+        ? aVal.localeCompare(bVal)
+        : aVal - bVal;
+      return summarySortDirection === 'asc' ? cmp : -cmp;
+    });
 
   // Effects
   useEffect(() => {
@@ -124,6 +136,15 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
     } else {
       setSortField(field);
       setSortDirection('asc');
+    }
+  };
+
+  const handleSummarySort = (field) => {
+    if (summarySortField === field) {
+      setSummarySortDirection(summarySortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSummarySortField(field);
+      setSummarySortDirection('asc');
     }
   };
 
@@ -298,11 +319,12 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
           <table className="min-w-full divide-y divide-gray-200" style={{tableLayout: 'fixed'}}>
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '35%'}}>Crop</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '15%'}}>Total Qty</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '10%'}}>Unit</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '30%'}}>Fields</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '10%'}}>Entries</th>
+                <SortableHeader field="cropName"      currentSort={summarySortField} direction={summarySortDirection} onSort={handleSummarySort} style={{width: '25%'}}>Crop</SortableHeader>
+                <SortableHeader field="totalQuantity" currentSort={summarySortField} direction={summarySortDirection} onSort={handleSummarySort} style={{width: '12%'}}>Total Qty</SortableHeader>
+                <SortableHeader field="measureUnitName" currentSort={summarySortField} direction={summarySortDirection} onSort={handleSummarySort} style={{width: '8%'}}>Unit</SortableHeader>
+                <SortableHeader sortable={false} style={{width: '28%'}}>Fields</SortableHeader>
+                <SortableHeader field="categoryName"  currentSort={summarySortField} direction={summarySortDirection} onSort={handleSummarySort} style={{width: '17%'}}>Category</SortableHeader>
+                <SortableHeader field="entryCount"    currentSort={summarySortField} direction={summarySortDirection} onSort={handleSummarySort} style={{width: '10%'}}>Entries</SortableHeader>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -320,6 +342,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
                       ))}
                     </div>
                   </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{row.categoryName}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">{row.entryCount}</td>
                 </tr>
               ))}
