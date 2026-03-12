@@ -29,6 +29,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
     entryId: null,
     selectedFieldIds: []
   });
+  const [isSummaryMode, setIsSummaryMode] = useState(false);
 
   // Context
   const { cropsMap, crops } = useCrops();
@@ -74,6 +75,28 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
     if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
+
+  // Summary: group by crop, sum quantities, deduplicate fields
+  const summaryEntries = Object.values(
+    enrichedEntries.reduce((acc, entry) => {
+      if (!acc[entry.cropId]) {
+        acc[entry.cropId] = {
+          cropId: entry.cropId,
+          cropName: entry.cropName,
+          totalQuantity: 0,
+          measureUnitName: entry.measureUnitName,
+          fieldNames: new Set(),
+          entryCount: 0,
+        };
+      }
+      acc[entry.cropId].totalQuantity += entry.quantity;
+      entry.harvestedFieldNames.forEach(f => acc[entry.cropId].fieldNames.add(f));
+      acc[entry.cropId].entryCount += 1;
+      return acc;
+    }, {})
+  )
+    .map(s => ({ ...s, fieldNames: [...s.fieldNames].sort() }))
+    .sort((a, b) => a.cropName.localeCompare(b.cropName));
 
   // Effects
   useEffect(() => {
@@ -150,39 +173,58 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
     <div className="bg-white w-full h-full min-h-screen">
       {/* Header */}
       <div className="px-4 py-4 border-b border-gray-200">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-start gap-3">
-              <button
-                onClick={() => navigate('/')}
-                className="text-gray-500 hover:text-gray-700 transition-colors duration-200 text-2xl"
-                style={{ background: 'none', border: 'none', padding: 0, marginTop: 4, borderRadius: 0, fontWeight: 'bold', textShadow: '0.5px 0 0 currentColor' }}
-                title="Back to main page"
-              >
-                🡄
-              </button>
-              <div>
-                <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-semibold text-gray-900">Harvest Log</h2>
-                  {sortedEntries.length > 0 && (
-                    <span className="text-sm text-gray-500">
-                      {sortedEntries.length} entr{sortedEntries.length !== 1 ? 'ies' : 'y'} total
-                      {selectedIds.length > 0 && ` • ${selectedIds.length} selected`}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-2">
-                  <DateRangeDiv {...dateRange} />
-                </div>
+        <div className="flex items-start justify-between gap-4">
+
+          {/* Left: back button + title + count + date range */}
+          <div className="flex items-start gap-3">
+            <button
+              onClick={() => navigate('/')}
+              className="text-gray-500 hover:text-gray-700 transition-colors duration-200 text-2xl"
+              style={{ background: 'none', border: 'none', padding: 0, marginTop: 4, borderRadius: 0, fontWeight: 'bold', textShadow: '0.5px 0 0 currentColor' }}
+              title="Back to main page"
+            >
+              🡄
+            </button>
+            <div>
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-semibold text-gray-900">Harvest Log</h2>
+                {sortedEntries.length > 0 && (
+                  <span className="text-sm text-gray-500">
+                    {sortedEntries.length} entr{sortedEntries.length !== 1 ? 'ies' : 'y'} total
+                    {selectedIds.length > 0 && ` • ${selectedIds.length} selected`}
+                  </span>
+                )}
+              </div>
+              <div className="mt-2">
+                <DateRangeDiv {...dateRange} />
               </div>
             </div>
           </div>
+
+          {/* Center: Summary toggle button */}
+          {sortedEntries.length > 0 && (
+            <div className="flex items-center self-center">
+              <button
+                onClick={() => setIsSummaryMode(prev => !prev)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${
+                  isSummaryMode
+                    ? 'bg-green-600 text-white border-green-600 hover:bg-green-700'
+                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+                }`}
+              >
+                {isSummaryMode ? 'Details' : 'Summary'}
+              </button>
+            </div>
+          )}
+
+          {/* Right: Timeframe navigation */}
           <TimeframeNav setDateRange={setDateRange} />
+
         </div>
       </div>
 
-      {/* Table or Empty State */}
-      {sortedEntries.length === 0 ? (
+      {/* Empty State */}
+      {sortedEntries.length === 0 && (
         <div className="px-6 py-12 text-center">
           <div className="text-gray-400 mb-2">
             <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -192,7 +234,10 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
           <h3 className="text-gray-500 font-medium">No harvest entries found</h3>
           <p className="text-gray-400 text-sm">Try adjusting your date range or add new harvest entries</p>
         </div>
-      ) : (
+      )}
+
+      {/* Detail Table */}
+      {sortedEntries.length > 0 && !isSummaryMode && (
         <div className="overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200" style={{tableLayout: 'fixed'}}>
             <HarvestTableHeader
@@ -217,6 +262,42 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
                   onFieldsClick={openFieldModal}
                   crops={crops}
                 />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Summary Table */}
+      {sortedEntries.length > 0 && isSummaryMode && (
+        <div className="overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200" style={{tableLayout: 'fixed'}}>
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '35%'}}>Crop</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '15%'}}>Total Qty</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '10%'}}>Unit</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '30%'}}>Fields</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style={{width: '10%'}}>Entries</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {summaryEntries.map((row, index) => (
+                <tr key={row.cropId} className={`transition-colors duration-150 ${index % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-yellow-50 hover:bg-yellow-100'}`}>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{row.cropName}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{row.totalQuantity}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{row.measureUnitName}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    <div className="flex flex-wrap gap-1">
+                      {row.fieldNames.map(name => (
+                        <span key={name} className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-full">
+                          {name}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{row.entryCount}</td>
+                </tr>
               ))}
             </tbody>
           </table>
