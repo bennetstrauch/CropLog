@@ -7,14 +7,14 @@ export const timeFrameOptions = [7, 30, 365];
 export const defaultTimeframe = timeFrameOptions[0];
 
 
-const TimeframeNav = ({ setDateRange }) => {
+const TimeframeNav = ({ setDateRange, isCustomMode = false, onPresetSelect }) => {
 
     // ## Refactor for better readability! - some already done
     const [timeframe, setTimeframe] = useState(defaultTimeframe);
 
     const [startDateOffset, setStartDateOffset] = useState(0); // Keep track: how far back we're viewing
 
-    
+
 
     useEffect(() => {
         updateDaterange();
@@ -31,6 +31,7 @@ const TimeframeNav = ({ setDateRange }) => {
 
     // Change timeframe to 7 days, 30 days, or 1 year
     const handleTimeframeChange = (newTimeframe) => {
+        onPresetSelect?.();
         setTimeframe(newTimeframe);
         setStartDateOffset(0); // Reset offset when changing the timeframe
     };
@@ -49,15 +50,14 @@ const TimeframeNav = ({ setDateRange }) => {
     };
 
 
-    const makeVisibleBelowChosenTimeframe = (timeFrameOption) =>
-        timeframe == timeFrameOption ? "visible" : "notVisible";
+    // Nav arrows only visible when a preset is active (not in custom mode)
+    const makeNavVisible = (timeFrameOption) =>
+        !isCustomMode && timeframe === timeFrameOption ? "visible" : "notVisible";
 
     const navigationButtons = (timeFrameOption) => (
-        <div 
-            className={`navigation-buttons 
-                ${makeVisibleBelowChosenTimeframe(timeFrameOption)} `}
+        <div
+            className={`navigation-buttons ${makeNavVisible(timeFrameOption)}`}
         >
-
             <button className="goBackInTime" onClick={() => navigateTimeframe("back")}>
                 {"<"}
             </button>
@@ -70,7 +70,7 @@ const TimeframeNav = ({ setDateRange }) => {
 
     const timeFrameButton = (timeFrameOption) => (
         <button
-            className={timeframe === timeFrameOption ? "active" : ""}
+            className={!isCustomMode && timeframe === timeFrameOption ? "active" : ""}
             onClick={() => handleTimeframeChange(timeFrameOption)}
         >
             {/* refactor this? # */}

@@ -14,6 +14,7 @@ import HarvestTableRow from "./components/HarvestTableRow";
 import FieldSelectionModal from "./components/FieldSelectionModal";
 import TimeframeNav from "./TimeframeNav";
 import DateRangeDiv from "./DateRangeDiv";
+import DateRangePicker from "./DateRangePicker";
 
 const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
   // Navigation
@@ -30,6 +31,8 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
     selectedFieldIds: []
   });
   const [isSummaryMode, setIsSummaryMode] = useState(false);
+  const [isCustomMode, setIsCustomMode] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
 
   // Context
   const { cropsMap, crops } = useCrops();
@@ -195,8 +198,25 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
                   </span>
                 )}
               </div>
-              <div className="mt-2">
-                <DateRangeDiv {...dateRange} />
+              <div className="relative mt-2">
+                <div
+                  className="cursor-pointer hover:opacity-70 transition-opacity"
+                  onClick={() => setShowPicker(p => !p)}
+                  title="Click to set custom date range"
+                >
+                  <DateRangeDiv {...dateRange} />
+                </div>
+                {showPicker && (
+                  <DateRangePicker
+                    currentRange={dateRange}
+                    onSelect={(range) => {
+                      setDateRange(range);
+                      setIsCustomMode(true);
+                      setShowPicker(false);
+                    }}
+                    onClose={() => setShowPicker(false)}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -208,8 +228,8 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
                 onClick={() => setIsSummaryMode(prev => !prev)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${
                   isSummaryMode
-                    ? 'bg-green-600 text-white border-green-600 hover:bg-green-700'
-                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+                    ? '!bg-teal-600 text-white border-teal-600 hover:!bg-teal-700'
+                    : '!bg-yellow-50 text-teal-600 border-teal-300 hover:!bg-yellow-100 hover:border-teal-400'
                 }`}
               >
                 {isSummaryMode ? 'Details' : 'Summary'}
@@ -218,7 +238,11 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
           )}
 
           {/* Right: Timeframe navigation */}
-          <TimeframeNav setDateRange={setDateRange} />
+          <TimeframeNav
+            setDateRange={setDateRange}
+            isCustomMode={isCustomMode}
+            onPresetSelect={() => setIsCustomMode(false)}
+          />
 
         </div>
       </div>
