@@ -84,3 +84,29 @@ export const addValue = (value) => (previousValues) =>
 
 export const removeValue = (valueToRemove) => (previousValues) =>
   previousValues.filter((value) => value !== valueToRemove);
+
+
+export function exportToCsv(rows, filename) {
+  if (!rows.length) return;
+
+  const escapeCell = (val) => {
+    const str = val == null ? '' : String(val);
+    return str.includes(',') || str.includes('"') || str.includes('\n')
+      ? `"${str.replace(/"/g, '""')}"`
+      : str;
+  };
+
+  const headers = Object.keys(rows[0]);
+  const lines = [
+    headers.map(escapeCell).join(','),
+    ...rows.map(row => headers.map(h => escapeCell(row[h])).join(',')),
+  ];
+
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}

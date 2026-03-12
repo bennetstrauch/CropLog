@@ -4,7 +4,7 @@ import { getEntriesFilteredBy } from "../../service/apiService";
 import { useCrops } from "../../context/CropsProvider";
 import { useFields } from "../../context/FieldsProvider";
 import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
-import { getCurrentDate, validateDate } from "../../service/utils";
+import { getCurrentDate, validateDate, exportToCsv } from "../../service/utils";
 import { useHarvestTableActions } from "./hooks/useHarvestTableActions";
 import { useNotification } from "../../context/NotificationContext";
 
@@ -148,6 +148,33 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
     }
   };
 
+  const handleExportCsv = () => {
+    const { startDate, endDate } = dateRange;
+    const dateTag = `${startDate}-to-${endDate}`;
+
+    if (isSummaryMode) {
+      const rows = summaryEntries.map(r => ({
+        Crop: r.cropName,
+        Category: r.categoryName,
+        'Total Quantity': r.totalQuantity,
+        Unit: r.measureUnitName,
+        Fields: r.fieldNames.join(', '),
+        Entries: r.entryCount,
+      }));
+      exportToCsv(rows, `harvest-summary-${dateTag}.csv`);
+    } else {
+      const rows = sortedEntries.map(e => ({
+        Date: e.harvestDate,
+        Crop: e.cropName,
+        Category: e.categoryName,
+        Quantity: e.quantity,
+        Unit: e.measureUnitName,
+        Fields: e.harvestedFieldNames.join(', '),
+      }));
+      exportToCsv(rows, `harvest-detail-${dateTag}.csv`);
+    }
+  };
+
   const handleToggleSelection = (entryId) => {
     setSelectedIds(prev =>
       prev.includes(entryId)
@@ -242,9 +269,9 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
             </div>
           </div>
 
-          {/* Center: Summary toggle button */}
+          {/* Center: Summary toggle + Export */}
           {sortedEntries.length > 0 && (
-            <div className="flex items-center self-center">
+            <div className="flex items-center self-center gap-2">
               <button
                 onClick={() => setIsSummaryMode(prev => !prev)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${
@@ -254,6 +281,16 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
                 }`}
               >
                 {isSummaryMode ? 'Details' : 'Summary'}
+              </button>
+              <button
+                onClick={handleExportCsv}
+                className="px-3 py-1.5 rounded-full text-sm font-medium border border-gray-300 text-gray-600 hover:bg-gray-100 transition-all duration-200 flex items-center gap-1"
+                title={`Export current ${isSummaryMode ? 'summary' : 'detail'} view as CSV`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                CSV
               </button>
             </div>
           )}
