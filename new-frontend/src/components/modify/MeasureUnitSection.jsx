@@ -6,7 +6,7 @@ import { updateMeasureUnit, deleteMeasureUnits } from "../../service/modifyServi
 import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
 
 const MeasureUnitSection = () => {
-  const { measureUnits, setMeasureUnits } = useMeasureUnits();
+  const { measureUnits, setMeasureUnits, loading } = useMeasureUnits();
 
   const handleAdded = (newUnit) => {
     setMeasureUnits((prev) => [...prev, newUnit]);
@@ -76,6 +76,7 @@ const MeasureUnitSection = () => {
         defaultSort="name"
         emptyMessage="No measure units yet"
         showActiveColumn={true}
+        loading={loading}
       />
     </div>
   );

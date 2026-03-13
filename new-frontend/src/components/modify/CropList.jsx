@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import Spinner from "../universal/Spinner";
 
-const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelected }) => {
+const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelected, loading = false }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [editingCrop, setEditingCrop] = useState(null);
   const [editingName, setEditingName] = useState("");
@@ -160,7 +161,12 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
         </div>
       </div>
 
-      {crops.length === 0 ? (
+      {loading ? (
+        <div className="px-6 py-12 flex flex-col items-center gap-3">
+          <Spinner size="lg" />
+          <p className="text-gray-400 text-sm">Loading...</p>
+        </div>
+      ) : crops.length === 0 ? (
         <div className="px-6 py-12 text-center">
           <div className="text-gray-400 mb-2">
             <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">

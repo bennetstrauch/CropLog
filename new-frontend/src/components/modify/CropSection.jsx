@@ -16,7 +16,7 @@ import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
 import { useCategories } from "../../context/CategoriesProvider";
 
 const CropSection = () => {
-  const { crops, setCrops } = useCrops();
+  const { crops, setCrops, loading: cropsLoading } = useCrops();
   const { measureUnits, setMeasureUnits } = useMeasureUnits();
   const { categories, setCategories } = useCategories();
 
@@ -138,6 +138,7 @@ const CropSection = () => {
         categories={categories}
         onUpdateCrop={handleUpdateCrop}
         onDeleteSelected={handleDeleteCrops}
+        loading={cropsLoading}
       />
 
       {modalOpen && pendingCrops.length > 0 && (

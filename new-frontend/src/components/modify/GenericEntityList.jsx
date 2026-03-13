@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Spinner from "../universal/Spinner";
 
 const GenericEntityList = ({
   title,
@@ -11,6 +12,7 @@ const GenericEntityList = ({
   emptyMessage = "No items yet",
   emptyIcon = null,
   showActiveColumn = false,
+  loading = false,
 }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [editingEntity, setEditingEntity] = useState(null);
@@ -217,7 +219,12 @@ const GenericEntityList = ({
         </div>
       </div>
 
-      {entities.length === 0 ? (
+      {loading ? (
+        <div className="px-6 py-12 flex flex-col items-center gap-3">
+          <Spinner size="lg" />
+          <p className="text-gray-400 text-sm">Loading...</p>
+        </div>
+      ) : entities.length === 0 ? (
         <div className="px-6 py-12 text-center">
           <div className="text-gray-400 mb-2">
             {emptyIcon || (

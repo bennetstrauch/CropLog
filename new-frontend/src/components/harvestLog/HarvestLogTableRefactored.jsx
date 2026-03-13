@@ -16,6 +16,7 @@ import FieldSelectionModal from "./components/FieldSelectionModal";
 import TimeframeNav from "./TimeframeNav";
 import DateRangeDiv from "./DateRangeDiv";
 import DateRangePicker from "./DateRangePicker";
+import Spinner from "../universal/Spinner";
 
 const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
   // Navigation
@@ -23,6 +24,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
 
   // State
   const [harvestEntries, setHarvestEntries] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [sortField, setSortField] = useState('harvestDate');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -120,12 +122,15 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
 
   // Data fetching
   async function fetchEntries() {
+    setLoading(true);
     try {
       const fetchedEntries = await getEntriesFilteredBy(dateRange);
       setHarvestEntries(fetchedEntries);
     } catch (error) {
       console.error("Failed to fetch harvest entries:", error);
       setHarvestEntries([]);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -270,7 +275,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
           </div>
 
           {/* Center: Summary toggle + Export */}
-          {sortedEntries.length > 0 && (
+          {!loading && sortedEntries.length > 0 && (
             <div className="flex items-center self-center gap-2">
               <button
                 onClick={() => setIsSummaryMode(prev => !prev)}
@@ -305,8 +310,16 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="px-6 py-12 flex flex-col items-center gap-3">
+          <Spinner size="lg" />
+          <p className="text-gray-400 text-sm">Loading harvest entries...</p>
+        </div>
+      )}
+
       {/* Empty State */}
-      {sortedEntries.length === 0 && (
+      {!loading && sortedEntries.length === 0 && (
         <div className="px-6 py-12 text-center">
           <div className="text-gray-400 mb-2">
             <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -319,7 +332,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
       )}
 
       {/* Detail Table */}
-      {sortedEntries.length > 0 && !isSummaryMode && (
+      {!loading && sortedEntries.length > 0 && !isSummaryMode && (
         <div className="overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200" style={{tableLayout: 'fixed'}}>
             <HarvestTableHeader
@@ -351,7 +364,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
       )}
 
       {/* Summary Table */}
-      {sortedEntries.length > 0 && isSummaryMode && (
+      {!loading && sortedEntries.length > 0 && isSummaryMode && (
         <div className="overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200" style={{tableLayout: 'fixed'}}>
             <thead className="bg-gray-50">

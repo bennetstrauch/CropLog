@@ -5,7 +5,7 @@ import { useCategories } from "../../context/CategoriesProvider";
 import { updateCategory, deleteCategories } from "../../service/modifyService";
 
 const CategorySection = () => {
-  const { categories, setCategories } = useCategories();
+  const { categories, setCategories, loading } = useCategories();
 
   const handleCategoryAdded = (newCat) => {
     setCategories((prev) => [...prev, newCat]);
@@ -67,6 +67,7 @@ const CategorySection = () => {
         defaultSort="name"
         emptyMessage="No categories yet"
         showActiveColumn={true}
+        loading={loading}
       />
     </div>
   );
