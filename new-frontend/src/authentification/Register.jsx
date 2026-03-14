@@ -1,27 +1,42 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../service/apiService'; // Corrected import path
+import { registerUser } from '../service/apiService';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [registered, setRegistered] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      // Backend expects { name, email, password }
       await registerUser({ name, email, password });
-      // On successful registration, you can redirect to the login page
-      navigate('/login'); 
+      setRegistered(true);
     } catch (err) {
-      setError('Registration failed. The email might already be in use.');
+      const message = err?.response?.data?.message;
+      if (err?.response?.status === 400 && message === 'Email already registered') {
+        setError('This email is already registered. Try logging in instead.');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
       console.error(err);
     }
   };
+
+  if (registered) {
+    return (
+      <div>
+        <h2>Check your inbox</h2>
+        <p>We sent a verification link to <strong>{email}</strong>.</p>
+        <p>Click the link in the email to activate your account, then log in.</p>
+        <button onClick={() => navigate('/login')}>Go to Login</button>
+      </div>
+    );
+  }
 
   return (
     <div>

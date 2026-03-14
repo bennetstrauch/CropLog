@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { Path_NewEntry } from "../../routes/AppRouter";
 import Spinner from "../universal/Spinner";
 
+const Path_ModifyCrops = "/modify/crops";
+
 function CropButtons({ harvestDate, harvestedFieldsRef }) {
   const navigate = useNavigate();
   const { crops, loading } = useCrops();
@@ -28,9 +30,24 @@ function CropButtons({ harvestDate, harvestedFieldsRef }) {
     );
   }
 
+  const activeCrops = crops.filter(c => c.active);
+
+  if (activeCrops.length === 0) {
+    return (
+      <div style={{ padding: "12px 0", display: "flex", flexDirection: "column", gap: "8px" }}>
+        <span style={{ fontSize: "0.875rem", color: "#6b7280" }}>
+          No crops yet. Create your first crop to get started.
+        </span>
+        <button onClick={() => navigate(Path_ModifyCrops)}>
+          + Create first crop
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div>
-      {mapToHTML(crops.filter(c => c.active), (crop) => (
+      {mapToHTML(activeCrops, (crop) => (
 
         <button key={crop.id} onClick={() => handleClick(crop)}>
           {" "}

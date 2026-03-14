@@ -38,7 +38,11 @@ const Login = () => {
       dispatch(loginSuccess({ token: response.token, user: response.user }));
       navigate("/");
     } catch (err) {
-      setError("Invalid email or password.");
+      if (err.response?.status === 403) {
+        setError("Please verify your email before logging in. Check your inbox.");
+      } else {
+        setError("Invalid email or password.");
+      }
     }
   };
 

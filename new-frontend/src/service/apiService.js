@@ -33,14 +33,10 @@ API.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Check if the error is due to authentication issues
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      console.log("Authentication error detected, logging out...");
-      // Trigger logout which will clear storage and redirect to login
+    const hasToken = !!localStorage.getItem("jwt_token");
+    if (hasToken && error.response && (error.response.status === 401 || error.response.status === 403)) {
       triggerLogout();
     }
-
-    // Re-throw the error so it can still be handled by the calling code
     return Promise.reject(error);
   }
 );
@@ -150,3 +146,4 @@ export async function deleteHarvestRecords(ids) {
 // You'll also need auth-specific calls
 export const loginUser = (credentials) => post("auth/login", credentials);
 export const registerUser = (userData) => post("auth/register", userData);
+export const verifyEmail = (token) => API.get(`auth/verify?token=${token}`);

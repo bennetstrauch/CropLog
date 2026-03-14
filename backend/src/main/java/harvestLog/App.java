@@ -28,6 +28,10 @@ public class App {
         System.setProperty("DB_USERNAME", dotenv.get("DB_USERNAME"));
         System.setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));
         System.setProperty("OPENAI_API_KEY", dotenv.get("OPENAI_API_KEY"));
+         System.setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));
+        System.setProperty("OPENAI_API_KEY", dotenv.get("OPENAI_API_KEY"));
+        System.setProperty("MAIL_USER", dotenv.get("MAIL_USER"));
+        System.setProperty("MAIL_PASS", dotenv.get("MAIL_PASS"));
 
         SpringApplication.run(App.class, args);
     }
