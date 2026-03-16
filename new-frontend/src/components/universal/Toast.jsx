@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from 'react';
 
-const Toast = ({ message, isVisible, onClose }) => {
+const STYLES = {
+  success: { background: '#4CAF50', duration: 3000 },
+  error:   { background: '#ef4444', duration: 5000 },
+};
+
+const Toast = ({ message, type = 'success', isVisible, onClose }) => {
   const [shouldRender, setShouldRender] = useState(false);
+  const { background, duration } = STYLES[type] ?? STYLES.success;
 
   useEffect(() => {
     if (isVisible) {
       setShouldRender(true);
-      // Auto-hide after 3 seconds
-      const timer = setTimeout(() => {
-        onClose();
-      }, 3000);
-
+      const timer = setTimeout(() => onClose(), duration);
       return () => clearTimeout(timer);
     } else {
-      // Delay unmounting to allow fade-out animation
-      const timer = setTimeout(() => {
-        setShouldRender(false);
-      }, 300);
-
+      const timer = setTimeout(() => setShouldRender(false), 300);
       return () => clearTimeout(timer);
     }
-  }, [isVisible, onClose]);
+  }, [isVisible, onClose, duration]);
 
   if (!shouldRender) return null;
 
@@ -31,7 +29,7 @@ const Toast = ({ message, isVisible, onClose }) => {
         position: 'fixed',
         bottom: '20px',
         left: '50%',
-        backgroundColor: '#4CAF50',
+        backgroundColor: background,
         color: 'white',
         padding: '12px 24px',
         borderRadius: '8px',

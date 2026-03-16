@@ -17,6 +17,7 @@ import TimeframeNav from "./TimeframeNav";
 import DateRangeDiv from "./DateRangeDiv";
 import DateRangePicker from "./DateRangePicker";
 import Spinner from "../universal/Spinner";
+import HarvestLogTutorial from "./HarvestLogTutorial";
 
 const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
   // Navigation
@@ -253,6 +254,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
               </div>
               <div className="relative mt-2">
                 <div
+                  id="harvest-log-date-range"
                   className="cursor-pointer hover:opacity-70 transition-opacity"
                   onClick={() => setShowPicker(p => !p)}
                   title="Click to set custom date range"
@@ -278,6 +280,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
           {!loading && sortedEntries.length > 0 && (
             <div className="flex items-center self-center gap-2">
               <button
+                id="harvest-log-summary-toggle"
                 onClick={() => setIsSummaryMode(prev => !prev)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${
                   isSummaryMode
@@ -301,11 +304,13 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
           )}
 
           {/* Right: Timeframe navigation */}
-          <TimeframeNav
-            setDateRange={setDateRange}
-            isCustomMode={isCustomMode}
-            onPresetSelect={() => setIsCustomMode(false)}
-          />
+          <div id="harvest-log-timeframe">
+            <TimeframeNav
+              setDateRange={setDateRange}
+              isCustomMode={isCustomMode}
+              onPresetSelect={() => setIsCustomMode(false)}
+            />
+          </div>
 
         </div>
       </div>
@@ -426,6 +431,9 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
           closeFieldModal();
         }}
       />
+
+      {/* Harvest Log Tutorial */}
+      <HarvestLogTutorial loading={loading} hasVisibleEntries={sortedEntries.length > 0} />
     </div>
   );
 };

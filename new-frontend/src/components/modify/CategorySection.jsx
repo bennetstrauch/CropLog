@@ -3,9 +3,11 @@ import AddCategoryForm from "./AddCategoryForm";
 import GenericEntityList from "./GenericEntityList";
 import { useCategories } from "../../context/CategoriesProvider";
 import { updateCategory, deleteCategories } from "../../service/modifyService";
+import { useNotification } from "../../context/NotificationContext";
 
 const CategorySection = () => {
   const { categories, setCategories, loading } = useCategories();
+  const { showNotification } = useNotification();
 
   const handleCategoryAdded = (newCat) => {
     setCategories((prev) => [...prev, newCat]);
@@ -29,7 +31,7 @@ const CategorySection = () => {
       );
     } catch (error) {
       console.error("Failed to update category:", error);
-      alert("Failed to update category.");
+      showNotification("Failed to update category.", "error");
     }
   };
 
@@ -37,9 +39,10 @@ const CategorySection = () => {
     try {
       await deleteCategories(ids);
       setCategories((prev) => prev.filter((c) => !ids.includes(c.id)));
+      showNotification("Deleted.");
     } catch (error) {
       console.error("Failed to delete categories:", error);
-      alert("Failed to delete categories.");
+      showNotification("Failed to delete categories.", "error");
     }
   };
 

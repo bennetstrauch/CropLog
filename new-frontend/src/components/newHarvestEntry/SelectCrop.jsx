@@ -9,7 +9,7 @@ const SelectCrop = ({ harvestDate, harvestedFieldsRef }) => {
   const navigate = useNavigate();
 
   const modifyCropsButton = (
-    <button onClick={() => navigate(Path_Modify)}>Modify Crops</button>
+    <button id="nav-manage" onClick={() => navigate(Path_Modify)}>Modify Crops</button>
   );
 
   return (

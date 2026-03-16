@@ -11,6 +11,8 @@ import ModifyLayout from "../components/modify/ModifyLayout";
 import Login from "../authentification/Login";
 import Register from "../authentification/Register";
 import VerifyEmail from "../authentification/VerifyEmail";
+import ForgotPassword from "../authentification/ForgotPassword";
+import ResetPassword from "../authentification/ResetPassword";
 import MainPageRefactored from "../pages/MainPageRefactored";
 import HarvestLog from "../pages/HarvestLog";
 import NotFoundPage from "../pages/NotFoundPage"; // A component for 404 errors
@@ -47,6 +49,8 @@ function AppRouter() {
           <Route path={Path_Login} element={<Login />} />
           <Route path={Path_Register} element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Route>
 
         {/* 2. Protected routes that require a logged-in user */}

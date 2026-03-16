@@ -41,6 +41,19 @@ API.interceptors.response.use(
   }
 );
 
+// --- Error Handling ---
+
+/**
+ * Extracts a human-readable message from any Axios error.
+ * Use this in catch blocks instead of accessing err.response manually.
+ */
+export function getErrorMessage(err) {
+  if (!err.response) {
+    return 'Connection failed. Please check your internet.';
+  }
+  return err.response?.data?.message || 'Something went wrong. Please try again.';
+}
+
 // --- Generic HTTP Methods ---
 // You don't need to pass userId anymore. The backend gets it from the token.
 
@@ -147,3 +160,6 @@ export async function deleteHarvestRecords(ids) {
 export const loginUser = (credentials) => post("auth/login", credentials);
 export const registerUser = (userData) => post("auth/register", userData);
 export const verifyEmail = (token) => API.get(`auth/verify?token=${token}`);
+export const resendVerification = (email) => post("auth/resend-verification", { email });
+export const forgotPassword = (email) => post("auth/forgot-password", { email });
+export const resetPassword = (token, newPassword) => post("auth/reset-password", { token, newPassword });

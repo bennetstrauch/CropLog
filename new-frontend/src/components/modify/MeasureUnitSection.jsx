@@ -4,9 +4,11 @@ import AddMeasureUnitForm from "./AddMeasureUnitForm";
 import GenericEntityList from "./GenericEntityList";
 import { updateMeasureUnit, deleteMeasureUnits } from "../../service/modifyService";
 import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
+import { useNotification } from "../../context/NotificationContext";
 
 const MeasureUnitSection = () => {
   const { measureUnits, setMeasureUnits, loading } = useMeasureUnits();
+  const { showNotification } = useNotification();
 
   const handleAdded = (newUnit) => {
     setMeasureUnits((prev) => [...prev, newUnit]);
@@ -31,7 +33,7 @@ const MeasureUnitSection = () => {
       );
     } catch (error) {
       console.error("Failed to update measure unit:", error);
-      alert("Failed to update measure unit.");
+      showNotification("Failed to update measure unit.", "error");
     }
   };
 
@@ -39,9 +41,10 @@ const MeasureUnitSection = () => {
     try {
       await deleteMeasureUnits(ids);
       setMeasureUnits((prev) => prev.filter((u) => !ids.includes(u.id)));
+      showNotification("Deleted.");
     } catch (error) {
       console.error("Failed to delete measure units:", error);
-      alert("Failed to delete measure units.");
+      showNotification("Failed to delete measure units.", "error");
     }
   };
 

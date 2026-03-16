@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import GenericAddForm from "./GenericAddForm";
 import { createCategories } from "../../service/modifyService";
+import { useNotification } from "../../context/NotificationContext";
 
 const AddCategoryForm = ({ onCategoryAdded }) => {
   const [categoriesInput, setCategoriesInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const { showNotification } = useNotification();
 
   const handleSubmit = async () => {
     setErrorMessage("");
@@ -24,6 +26,7 @@ const AddCategoryForm = ({ onCategoryAdded }) => {
         newCategories.forEach(category => onCategoryAdded(category));
       }
 
+      showNotification("Category added!");
       setCategoriesInput("");
     } catch (err) {
       setErrorMessage("Failed to add categories.");

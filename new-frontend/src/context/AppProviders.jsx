@@ -6,18 +6,21 @@ import { FieldsProvider } from "./FieldsProvider";
 import { MeasureUnitsProvider } from "./MeasureUnitsProvider";
 import { CategoriesProvider } from "./CategoriesProvider";
 import { NotificationProvider } from "./NotificationContext";
+import { TutorialProvider } from "./TutorialContext";
 
 export default function AppProviders({ children }) {
   // Priority loading: Crops first, then fields, measure units, and categories load independently in background
   return (
     <NotificationProvider>
-      <CropsProvider>
-        <FieldsProvider>
-          <MeasureUnitsProvider>
-            <CategoriesProvider>{children ?? <Outlet />}</CategoriesProvider>
-          </MeasureUnitsProvider>
-        </FieldsProvider>
-      </CropsProvider>
+      <TutorialProvider>
+        <CropsProvider>
+          <FieldsProvider>
+            <MeasureUnitsProvider>
+              <CategoriesProvider>{children ?? <Outlet />}</CategoriesProvider>
+            </MeasureUnitsProvider>
+          </FieldsProvider>
+        </CropsProvider>
+      </TutorialProvider>
     </NotificationProvider>
   );
 }

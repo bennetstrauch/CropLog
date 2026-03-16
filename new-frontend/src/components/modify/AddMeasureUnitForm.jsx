@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import GenericAddForm from "./GenericAddForm";
 import { createMeasureUnit } from "../../service/modifyService";
+import { useNotification } from "../../context/NotificationContext";
 
 const AddMeasureUnitForm = ({ onAdded }) => {
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const { showNotification } = useNotification();
 
   const handleSubmit = async () => {
     setErrorMessage("");
@@ -17,6 +19,7 @@ const AddMeasureUnitForm = ({ onAdded }) => {
       };
       const newUnit = await createMeasureUnit(unitToPost);
       if (onAdded) onAdded(newUnit);
+      showNotification("Measure unit added!");
       setName("");
       setAbbreviation("");
     } catch (err) {

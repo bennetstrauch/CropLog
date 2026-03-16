@@ -1,29 +1,44 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../service/apiService';
+import { registerUser, resendVerification, getErrorMessage } from '../service/apiService';
+import Spinner from '../components/universal/Spinner';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
+  const [resendStatus, setResendStatus] = useState('');
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       await registerUser({ name, email, password });
       setRegistered(true);
     } catch (err) {
-      const message = err?.response?.data?.message;
-      if (err?.response?.status === 400 && message === 'Email already registered') {
+      if (err?.response?.status === 400 && err?.response?.data?.message === 'Email already registered') {
         setError('This email is already registered. Try logging in instead.');
       } else {
-        setError('Registration failed. Please try again.');
+        setError(getErrorMessage(err));
       }
       console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResendStatus('Sending...');
+    try {
+      await resendVerification(email);
+      setResendStatus('Verification email sent! Check your inbox.');
+    } catch {
+      setResendStatus('Failed to resend. Please try again.');
     }
   };
 
@@ -33,6 +48,8 @@ const Register = () => {
         <h2>Check your inbox</h2>
         <p>We sent a verification link to <strong>{email}</strong>.</p>
         <p>Click the link in the email to activate your account, then log in.</p>
+        <button onClick={handleResend}>Resend verification email</button>
+        {resendStatus && <p>{resendStatus}</p>}
         <button onClick={() => navigate('/login')}>Go to Login</button>
       </div>
     );
@@ -55,7 +72,13 @@ const Register = () => {
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength="6" required />
         </div>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit">Register</button>
+        <button type="submit" disabled={loading}>
+          {loading ? (
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <Spinner size="sm" /> Registering...
+            </span>
+          ) : "Register"}
+        </button>
       </form>
     </div>
   );

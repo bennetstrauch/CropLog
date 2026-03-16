@@ -2,10 +2,12 @@
 import React, { useState } from "react";
 import GenericAddForm from "./GenericAddForm";
 import { createFields } from "../../service/modifyService";
+import { useNotification } from "../../context/NotificationContext";
 
 const AddFieldForm = ({ onFieldAdded }) => {
   const [fieldsInput, setFieldsInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const { showNotification } = useNotification();
 
   const handleSubmit = async () => {
     setErrorMessage("");
@@ -25,6 +27,7 @@ const AddFieldForm = ({ onFieldAdded }) => {
         newFields.forEach(field => onFieldAdded(field));
       }
 
+      showNotification("Field added!");
       setFieldsInput("");
     } catch (err) {
       setErrorMessage("Failed to add fields.");

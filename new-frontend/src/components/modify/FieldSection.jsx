@@ -3,11 +3,13 @@ import AddFieldForm from "./AddFieldForm";
 import GenericEntityList from "./GenericEntityList";
 import { getFields, updateField, deleteFields } from "../../service/modifyService";
 import { useFields } from "../../context/FieldsProvider";
+import { useNotification } from "../../context/NotificationContext";
 
 const FieldSection = () => {
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(true);
   const { reload: reloadFieldsContext } = useFields();
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     loadFields();
@@ -49,7 +51,7 @@ const FieldSection = () => {
       reloadFieldsContext();
     } catch (error) {
       console.error("Failed to update field:", error);
-      alert("Failed to update field.");
+      showNotification("Failed to update field.", "error");
     }
   };
 
@@ -58,9 +60,10 @@ const FieldSection = () => {
       await deleteFields(ids);
       setFields((prev) => prev.filter((f) => !ids.includes(f.id)));
       reloadFieldsContext();
+      showNotification("Deleted.");
     } catch (error) {
       console.error("Failed to delete fields:", error);
-      alert("Failed to delete fields.");
+      showNotification("Failed to delete fields.", "error");
     }
   };
 

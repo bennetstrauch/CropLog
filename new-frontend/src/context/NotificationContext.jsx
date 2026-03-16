@@ -6,21 +6,16 @@ const NotificationContext = createContext();
 export const NotificationProvider = ({ children }) => {
   const [notification, setNotification] = useState({
     message: '',
+    type: 'success',
     isVisible: false
   });
 
-  const showNotification = (message) => {
-    setNotification({
-      message,
-      isVisible: true
-    });
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type, isVisible: true });
   };
 
   const hideNotification = () => {
-    setNotification(prev => ({
-      ...prev,
-      isVisible: false
-    }));
+    setNotification(prev => ({ ...prev, isVisible: false }));
   };
 
   return (
@@ -28,6 +23,7 @@ export const NotificationProvider = ({ children }) => {
       {children}
       <Toast
         message={notification.message}
+        type={notification.type}
         isVisible={notification.isVisible}
         onClose={hideNotification}
       />

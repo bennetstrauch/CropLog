@@ -14,11 +14,13 @@ import {
 import { useCrops } from "../../context/CropsProvider";
 import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
 import { useCategories } from "../../context/CategoriesProvider";
+import { useNotification } from "../../context/NotificationContext";
 
 const CropSection = () => {
   const { crops, setCrops, loading: cropsLoading } = useCrops();
   const { measureUnits, setMeasureUnits } = useMeasureUnits();
   const { categories, setCategories } = useCategories();
+  const { showNotification } = useNotification();
 
   const [pendingCrops, setPendingCrops] = useState([]); // holds crops that need category resolution
   const [modalOpen, setModalOpen] = useState(false);
@@ -38,6 +40,7 @@ const CropSection = () => {
 
       if (resolved.length > 0) {
         setCrops((prev) => [...prev, ...resolved]);
+        showNotification("Crop added!");
       }
 
       if (unresolved.length > 0) {
@@ -45,7 +48,7 @@ const CropSection = () => {
         setModalOpen(true);
       }
     } catch {
-      alert("Failed to add crops.");
+      showNotification("Failed to add crops.", "error");
     }
   };
 
@@ -75,7 +78,7 @@ const CropSection = () => {
       );
     } catch (error) {
       console.error("Failed to update crop:", error);
-      alert("Failed to update crop.");
+      showNotification("Failed to update crop.", "error");
     }
   };
 
@@ -83,8 +86,9 @@ const CropSection = () => {
     try {
       await deleteCrops(ids);
       setCrops((prev) => prev.filter((c) => !ids.includes(c.id)));
+      showNotification("Deleted.");
     } catch {
-      alert("Failed to delete crops.");
+      showNotification("Failed to delete crops.", "error");
     }
   };
 
@@ -102,6 +106,7 @@ const CropSection = () => {
       ]);
       setCrops(refreshedCrops);
       setCategories(refreshedCategories);
+      showNotification("Crop added!");
     } catch {
       console.warn("Failed to refresh crops and categories after category suggestion save.");
     }
