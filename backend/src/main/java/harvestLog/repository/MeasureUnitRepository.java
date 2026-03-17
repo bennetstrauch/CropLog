@@ -34,4 +34,9 @@ public interface MeasureUnitRepository extends JpaRepository<MeasureUnit, Long> 
     @Modifying
     @Query("DELETE FROM MeasureUnit m WHERE m.id IN :ids AND m.farmer.id = :farmerId")
     int deleteByIdInAndFarmerId(@Param("ids") List<Long> ids, @Param("farmerId") Long farmerId);
+
+    // Batch active toggle
+    @Modifying
+    @Query("UPDATE MeasureUnit m SET m.active = :active WHERE m.id IN :ids AND m.farmer.id = :farmerId")
+    int updateActiveStatusByIdInAndFarmerId(@Param("ids") List<Long> ids, @Param("active") boolean active, @Param("farmerId") Long farmerId);
 }

@@ -3,26 +3,20 @@
 import { updateHarvestRecord, deleteHarvestRecords } from '../../../service/apiService';
 import { useNotification } from '../../../context/NotificationContext';
 
-export const useHarvestTableActions = (onDataChange) => {
+export const useHarvestTableActions = (onDataChange, onDeleteSuccess) => {
   const { showNotification } = useNotification();
 
   const updateEntry = async (entryId, field, value, fullEntry) => {
     try {
-      // Get the current entry data first
       if (!fullEntry) {
         throw new Error('Full entry data is required for updates');
       }
 
-      // Prepare the complete update data based on field type
       const updateData = prepareCompleteUpdateData(fullEntry, field, value);
-
       await updateHarvestRecord(entryId, updateData);
       showNotification('Entry updated!');
 
-      // Trigger data refresh
-      if (onDataChange) {
-        onDataChange();
-      }
+      if (onDataChange) onDataChange();
     } catch (error) {
       console.error('Failed to update harvest entry:', error);
       showNotification('Failed to update entry');
@@ -33,17 +27,12 @@ export const useHarvestTableActions = (onDataChange) => {
     if (entryIds.length === 0) return;
 
     const confirmMessage = `Are you sure you want to delete ${entryIds.length} harvest ${entryIds.length === 1 ? 'entry' : 'entries'}?`;
-
     if (!window.confirm(confirmMessage)) return;
 
     try {
       await deleteHarvestRecords(entryIds);
       showNotification(`${entryIds.length} ${entryIds.length === 1 ? 'entry' : 'entries'} deleted!`);
-
-      // Trigger data refresh
-      if (onDataChange) {
-        onDataChange();
-      }
+      if (onDeleteSuccess) onDeleteSuccess(entryIds);
     } catch (error) {
       console.error('Failed to delete harvest entries:', error);
       showNotification('Failed to delete entries');

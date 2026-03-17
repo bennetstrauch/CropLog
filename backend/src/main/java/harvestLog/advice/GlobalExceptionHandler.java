@@ -1,6 +1,8 @@
 package harvestLog.advice;
 
+import harvestLog.dto.DependencyConflictResponse;
 import harvestLog.dto.ErrorResponse;
+import harvestLog.exception.DependencyConflictException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,12 @@ import org.springframework.web.server.ResponseStatusException;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(DependencyConflictException.class)
+    public ResponseEntity<DependencyConflictResponse> handleDependencyConflict(DependencyConflictException ex) {
+        log.warn("Dependency conflict: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getConflictData());
+    }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> handleResponseStatus(ResponseStatusException ex) {

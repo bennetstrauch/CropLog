@@ -7,31 +7,29 @@ import { useNotification } from "../../context/NotificationContext";
 const AddFieldForm = ({ onFieldAdded }) => {
   const [fieldsInput, setFieldsInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { showNotification } = useNotification();
 
   const handleSubmit = async () => {
     setErrorMessage("");
+    const fieldNames = fieldsInput.split(",").map((f) => f.trim()).filter(name => name !== "");
+    if (fieldNames.length === 0) {
+      setErrorMessage("Please enter at least one field name.");
+      return;
+    }
 
+    setIsSubmitting(true);
     try {
-      const fieldNames = fieldsInput.split(",").map((f) => f.trim()).filter(name => name !== "");
-      if (fieldNames.length === 0) {
-        setErrorMessage("Please enter at least one field name.");
-        return;
-      }
-
       const fieldRequests = fieldNames.map(name => ({ name }));
       const newFields = await createFields(fieldRequests);
-
-      // Add all new fields to the context
-      if (onFieldAdded) {
-        newFields.forEach(field => onFieldAdded(field));
-      }
-
+      if (onFieldAdded) newFields.forEach(field => onFieldAdded(field));
       showNotification("Field added!");
       setFieldsInput("");
     } catch (err) {
       setErrorMessage("Failed to add fields.");
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -46,6 +44,7 @@ const AddFieldForm = ({ onFieldAdded }) => {
         validation: (value) => value.trim() !== ""
       }}
       onSubmit={handleSubmit}
+      isLoading={isSubmitting}
       errorMessage={errorMessage}
     />
   );

@@ -31,4 +31,8 @@ public interface FieldRepository extends JpaRepository<Field, Long> {
     @Query("DELETE FROM Field f WHERE f.id IN :ids AND f.farmer.id = :farmerId")
     int deleteByIdInAndFarmerId(@Param("ids") List<Long> ids, @Param("farmerId") Long farmerId);
 
+    // Batch active toggle
+    @Modifying
+    @Query("UPDATE Field f SET f.active = :active WHERE f.id IN :ids AND f.farmer.id = :farmerId")
+    int updateActiveStatusByIdInAndFarmerId(@Param("ids") List<Long> ids, @Param("active") boolean active, @Param("farmerId") Long farmerId);
 }

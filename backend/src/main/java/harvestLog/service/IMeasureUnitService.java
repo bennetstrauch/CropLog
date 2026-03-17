@@ -21,5 +21,7 @@ public interface IMeasureUnitService {
 
     boolean delete(Long id, Long farmerId);
     int deleteBatch(List<Long> ids, Long farmerId);
+    void hardDeleteBatch(List<Long> ids, Long farmerId, boolean cascade);
+    void updateActiveBatch(List<Long> ids, Long farmerId, boolean active);
 
 }

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Spinner from "../universal/Spinner";
+import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import DependencyWarningModal from "./DependencyWarningModal";
 
 const GenericEntityList = ({
   title,
@@ -7,6 +9,9 @@ const GenericEntityList = ({
   fields,
   onUpdate,
   onDeleteSelected,
+  onHardDeleteSelected,
+  onBatchToggleActive,
+  entityName = "Item",
   sortable = [],
   defaultSort = null,
   emptyMessage = "No items yet",
@@ -21,6 +26,10 @@ const GenericEntityList = ({
   const [saveTimeout, setSaveTimeout] = useState(null);
   const [sortField, setSortField] = useState(defaultSort || (fields.length > 0 ? fields[0].key : null));
   const [sortDirection, setSortDirection] = useState("asc");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showDependencyModal, setShowDependencyModal] = useState(false);
+  const [dependencyData, setDependencyData] = useState(null);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
 
   const toggleSelection = (id) => {
     setSelectedIds((prev) =>
@@ -29,7 +38,6 @@ const GenericEntityList = ({
   };
 
   const startEditing = (entity, field) => {
-    // Clear any pending save
     if (saveTimeout) {
       clearTimeout(saveTimeout);
       setSaveTimeout(null);
@@ -67,12 +75,10 @@ const GenericEntityList = ({
   const handleValueChange = (value) => {
     setEditingValue(value);
 
-    // Clear existing timeout
     if (saveTimeout) {
       clearTimeout(saveTimeout);
     }
 
-    // Set new timeout for auto-save after 2 seconds of no typing
     const timeout = setTimeout(() => {
       const originalValue = entities.find(e => e.id === editingEntity)?.[editingField];
       if (value.trim() && value.trim() !== originalValue) {
@@ -91,12 +97,64 @@ const GenericEntityList = ({
     }
   };
 
+  // Opens the confirm modal instead of window.confirm
   const handleDelete = () => {
-    if (selectedIds.length === 0) return alert("No items selected.");
-    if (window.confirm(`Are you sure you want to delete the selected ${selectedIds.length} item${selectedIds.length !== 1 ? 's' : ''}?`)) {
-      onDeleteSelected(selectedIds);
+    if (selectedIds.length === 0) return;
+    setShowConfirmModal(true);
+  };
+
+  const handleMarkInactive = () => {
+    onDeleteSelected(selectedIds);
+    setSelectedIds([]);
+    setShowConfirmModal(false);
+  };
+
+  const handleDeleteForever = async () => {
+    if (!onHardDeleteSelected) return;
+    const idsToDelete = selectedIds;
+    setShowConfirmModal(false);
+    try {
+      await onHardDeleteSelected(idsToDelete, false);
       setSelectedIds([]);
+    } catch (error) {
+      if (error.response?.status === 409) {
+        const data = error.response.data;
+        setPendingDeleteIds(idsToDelete);
+        setDependencyData({
+          affectedCrops: data.affectedCrops || [],
+          affectedHarvestRecordCount: data.affectedHarvestRecordCount || 0,
+          isFieldDelete: (data.affectedCrops || []).length === 0 && (data.affectedHarvestRecordCount || 0) > 0,
+        });
+        setShowDependencyModal(true);
+      }
     }
+  };
+
+  const handleCascadeConfirm = async () => {
+    if (!onHardDeleteSelected) return;
+    try {
+      await onHardDeleteSelected(pendingDeleteIds, true);
+      setSelectedIds([]);
+    } catch (error) {
+      console.error("Cascade delete failed:", error);
+    } finally {
+      setShowDependencyModal(false);
+      setPendingDeleteIds([]);
+      setDependencyData(null);
+    }
+  };
+
+  const handleBatchToggle = () => {
+    if (!onBatchToggleActive || selectedIds.length === 0) return;
+    const activeCount = selectedIds.filter(id => entities.find(e => e.id === id)?.active).length;
+    const markInactive = activeCount >= selectedIds.length / 2;
+    onBatchToggleActive(selectedIds, !markInactive);
+    setSelectedIds([]);
+  };
+
+  const getBatchToggleLabel = () => {
+    const activeCount = selectedIds.filter(id => entities.find(e => e.id === id)?.active).length;
+    return activeCount >= selectedIds.length / 2 ? "Mark as Inactive" : "Mark as Active";
   };
 
   const handleSort = (fieldKey) => {
@@ -324,9 +382,20 @@ const GenericEntityList = ({
         </div>
       )}
 
-      {/* Floating delete bar */}
+      {/* Floating action bar */}
       {selectedIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-2 duration-300">
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-2 duration-300 flex items-center gap-2">
+          {onBatchToggleActive && (
+            <button
+              onClick={handleBatchToggle}
+              className="bg-amber-500 hover:bg-amber-600 text-white font-medium px-5 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center gap-2 select-none text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+              </svg>
+              {getBatchToggleLabel()}
+            </button>
+          )}
           <button
             onClick={handleDelete}
             className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center gap-2 select-none"
@@ -338,6 +407,27 @@ const GenericEntityList = ({
           </button>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        isOpen={showConfirmModal}
+        count={selectedIds.length}
+        entityName={entityName}
+        onMarkInactive={handleMarkInactive}
+        onDeleteForever={handleDeleteForever}
+        onCancel={() => setShowConfirmModal(false)}
+      />
+
+      <DependencyWarningModal
+        isOpen={showDependencyModal}
+        dependencies={dependencyData}
+        entityType={entityName}
+        onConfirm={handleCascadeConfirm}
+        onCancel={() => {
+          setShowDependencyModal(false);
+          setPendingDeleteIds([]);
+          setDependencyData(null);
+        }}
+      />
     </div>
   );
 };

@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import Spinner from "../universal/Spinner";
+import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import DependencyWarningModal from "./DependencyWarningModal";
 
-const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelected, loading = false }) => {
+const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelected, onHardDeleteSelected, onBatchToggleActive, loading = false }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [editingCrop, setEditingCrop] = useState(null);
   const [editingName, setEditingName] = useState("");
   const [saveTimeout, setSaveTimeout] = useState(null);
   const [sortField, setSortField] = useState("name");
   const [sortDirection, setSortDirection] = useState("asc");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showDependencyModal, setShowDependencyModal] = useState(false);
+  const [dependencyData, setDependencyData] = useState(null);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
 
   const toggleSelection = (id) => {
     setSelectedIds((prev) =>
@@ -20,7 +26,6 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
   };
 
   const startEditingName = (crop) => {
-    // Clear any pending save
     if (saveTimeout) {
       clearTimeout(saveTimeout);
       setSaveTimeout(null);
@@ -55,17 +60,14 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
   const handleNameChange = (value) => {
     setEditingName(value);
 
-    // Clear existing timeout
     if (saveTimeout) {
       clearTimeout(saveTimeout);
     }
 
-    // Set new timeout for auto-save after 4 seconds of no typing
     const timeout = setTimeout(() => {
       const originalName = crops.find(c => c.id === editingCrop)?.name;
       if (value.trim() && value.trim() !== originalName) {
         onUpdateCrop(editingCrop, "name", value.trim());
-        // Don't exit edit mode on auto-save, keep the field active
       }
     }, 2000);
 
@@ -81,11 +83,62 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
   };
 
   const handleDelete = () => {
-    if (selectedIds.length === 0) return alert("No crops selected.");
-    if (window.confirm("Are you sure you want to delete the selected crops?")) {
-      onDeleteSelected(selectedIds);
+    if (selectedIds.length === 0) return;
+    setShowConfirmModal(true);
+  };
+
+  const handleMarkInactive = () => {
+    onDeleteSelected(selectedIds);
+    setSelectedIds([]);
+    setShowConfirmModal(false);
+  };
+
+  const handleDeleteForever = async () => {
+    if (!onHardDeleteSelected) return;
+    const idsToDelete = selectedIds;
+    setShowConfirmModal(false);
+    try {
+      await onHardDeleteSelected(idsToDelete, false);
       setSelectedIds([]);
+    } catch (error) {
+      if (error.response?.status === 409) {
+        const data = error.response.data;
+        setPendingDeleteIds(idsToDelete);
+        setDependencyData({
+          affectedCrops: data.affectedCrops || [],
+          affectedHarvestRecordCount: data.affectedHarvestRecordCount || 0,
+          isFieldDelete: false,
+        });
+        setShowDependencyModal(true);
+      }
     }
+  };
+
+  const handleCascadeConfirm = async () => {
+    if (!onHardDeleteSelected) return;
+    try {
+      await onHardDeleteSelected(pendingDeleteIds, true);
+      setSelectedIds([]);
+    } catch (error) {
+      console.error("Cascade delete failed:", error);
+    } finally {
+      setShowDependencyModal(false);
+      setPendingDeleteIds([]);
+      setDependencyData(null);
+    }
+  };
+
+  const handleBatchToggle = () => {
+    if (!onBatchToggleActive || selectedIds.length === 0) return;
+    const activeCount = selectedIds.filter(id => crops.find(c => c.id === id)?.active).length;
+    const markInactive = activeCount >= selectedIds.length / 2;
+    onBatchToggleActive(selectedIds, !markInactive);
+    setSelectedIds([]);
+  };
+
+  const getBatchToggleLabel = () => {
+    const activeCount = selectedIds.filter(id => crops.find(c => c.id === id)?.active).length;
+    return activeCount >= selectedIds.length / 2 ? "Mark as Inactive" : "Mark as Active";
   };
 
   const handleSort = (field) => {
@@ -99,7 +152,6 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
 
   const getSortedCrops = () => {
     return [...crops].sort((a, b) => {
-      // Active always comes first, regardless of other sorting
       if (a.active !== b.active) return a.active ? -1 : 1;
 
       let aValue, bValue;
@@ -317,9 +369,20 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
         </div>
       )}
 
-      {/* Floating delete bar */}
+      {/* Floating action bar */}
       {selectedIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-2 duration-300">
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-2 duration-300 flex items-center gap-2">
+          {onBatchToggleActive && (
+            <button
+              onClick={handleBatchToggle}
+              className="bg-amber-500 hover:bg-amber-600 text-white font-medium px-5 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center gap-2 select-none text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+              </svg>
+              {getBatchToggleLabel()}
+            </button>
+          )}
           <button
             onClick={handleDelete}
             className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center gap-2 select-none"
@@ -331,6 +394,27 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
           </button>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        isOpen={showConfirmModal}
+        count={selectedIds.length}
+        entityName="Crop"
+        onMarkInactive={handleMarkInactive}
+        onDeleteForever={handleDeleteForever}
+        onCancel={() => setShowConfirmModal(false)}
+      />
+
+      <DependencyWarningModal
+        isOpen={showDependencyModal}
+        dependencies={dependencyData}
+        entityType="Crop"
+        onConfirm={handleCascadeConfirm}
+        onCancel={() => {
+          setShowDependencyModal(false);
+          setPendingDeleteIds([]);
+          setDependencyData(null);
+        }}
+      />
     </div>
   );
 };

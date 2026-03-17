@@ -2,14 +2,18 @@ package harvestLog.service.impl;
 
 import harvestLog.dto.CropRequest;
 import harvestLog.dto.CropResponse;
+import harvestLog.dto.DependencyConflictResponse;
 import harvestLog.exception.AlreadyExistsException;
+import harvestLog.exception.DependencyConflictException;
 import harvestLog.model.Crop;
 import harvestLog.model.Farmer;
 import harvestLog.model.Category;
+import harvestLog.model.HarvestRecord;
 import harvestLog.model.MeasureUnit;
 import harvestLog.repository.CategoryRepository;
 import harvestLog.repository.CropRepository;
 import harvestLog.repository.FarmerRepository;
+import harvestLog.repository.HarvestRecordRepository;
 import harvestLog.repository.MeasureUnitRepository;
 import harvestLog.service.ICropService;
 import harvestLog.service.ICategoryService;
@@ -21,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +43,7 @@ public class CropService implements ICropService {
     private final MeasureUnitRepository measureUnitRepo;
     private final CategoryRepository categoryRepo;
     private final CategoryAiService categoryAiService;
+    private final HarvestRecordRepository harvestRecordRepo;
 
     public CropService(
             CropRepository cropRepo,
@@ -45,7 +51,8 @@ public class CropService implements ICropService {
             ICategoryService categoryService,
             MeasureUnitRepository measureUnitRepo,
             CategoryRepository categoryRepo,
-            CategoryAiService categoryAiService
+            CategoryAiService categoryAiService,
+            HarvestRecordRepository harvestRecordRepo
     ) {
         this.cropRepo = cropRepo;
         this.farmerRepo = farmerRepo;
@@ -53,6 +60,7 @@ public class CropService implements ICropService {
         this.measureUnitRepo = measureUnitRepo;
         this.categoryRepo = categoryRepo;
         this.categoryAiService = categoryAiService;
+        this.harvestRecordRepo = harvestRecordRepo;
     }
 
     @Override
@@ -349,6 +357,65 @@ public class CropService implements ICropService {
 
         // Use soft deletion instead of hard deletion
         return cropRepo.softDeleteByIdInAndFarmerId(ids, farmerId);
+    }
+
+    @Override
+    @Transactional
+    public void hardDeleteBatch(List<Long> ids, Long farmerId, boolean cascade) {
+        if (ids == null || ids.isEmpty()) return;
+
+        List<Crop> crops = cropRepo.findAllById(ids).stream()
+                .filter(c -> c.getFarmer().getId().equals(farmerId))
+                .collect(Collectors.toList());
+
+        if (crops.isEmpty()) return;
+
+        List<Long> validIds = crops.stream().map(Crop::getId).collect(Collectors.toList());
+
+        int affectedCount = harvestRecordRepo.countByFarmerIdAndCrop_IdIn(farmerId, validIds);
+
+        if (affectedCount > 0 && !cascade) {
+            throw new DependencyConflictException(new DependencyConflictResponse(
+                    "This crop is referenced by harvest records",
+                    "DEPENDENCY_CONFLICT",
+                    List.of(),
+                    affectedCount,
+                    LocalDateTime.now()
+            ));
+        }
+
+        if (cascade && affectedCount > 0) {
+            Map<Long, String> cropNameMap = crops.stream()
+                    .collect(Collectors.toMap(Crop::getId, Crop::getName));
+            Map<Long, String> cropMuMap = crops.stream()
+                    .filter(c -> c.getMeasureUnit() != null)
+                    .collect(Collectors.toMap(Crop::getId, c -> {
+                        var mu = c.getMeasureUnit();
+                        return (mu.getAbbreviation() != null && !mu.getAbbreviation().isBlank())
+                                ? mu.getAbbreviation() : mu.getName();
+                    }));
+            List<HarvestRecord> affected = harvestRecordRepo.findByFarmerIdAndCrop_IdIn(farmerId, validIds);
+            for (HarvestRecord record : affected) {
+                if (record.getCrop() != null) {
+                    Long cropId = record.getCrop().getId();
+                    record.setArchivedCropName(cropNameMap.getOrDefault(cropId, record.getCrop().getName()));
+                    record.setArchivedMeasureUnitName(cropMuMap.get(cropId));
+                    record.setCrop(null);
+                    record.setArchived(true);
+                }
+            }
+            harvestRecordRepo.saveAll(affected);
+            harvestRecordRepo.flush();
+        }
+
+        cropRepo.deleteByIdInAndFarmerId(validIds, farmerId);
+    }
+
+    @Override
+    @Transactional
+    public void updateActiveBatch(List<Long> ids, Long farmerId, boolean active) {
+        if (ids == null || ids.isEmpty()) return;
+        cropRepo.updateActiveStatusByIdInAndFarmerId(ids, active, farmerId);
     }
 
     // ===== Mapping helpers =====

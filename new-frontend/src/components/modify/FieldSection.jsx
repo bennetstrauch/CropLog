@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AddFieldForm from "./AddFieldForm";
 import GenericEntityList from "./GenericEntityList";
-import { getFields, updateField, deleteFields } from "../../service/modifyService";
+import { getFields, updateField, deleteFields, hardDeleteFields, updateFieldsActiveBatch } from "../../service/modifyService";
 import { useFields } from "../../context/FieldsProvider";
 import { useNotification } from "../../context/NotificationContext";
 
@@ -60,10 +60,29 @@ const FieldSection = () => {
       await deleteFields(ids);
       setFields((prev) => prev.filter((f) => !ids.includes(f.id)));
       reloadFieldsContext();
-      showNotification("Deleted.");
+      showNotification("Marked as inactive.");
     } catch (error) {
       console.error("Failed to delete fields:", error);
       showNotification("Failed to delete fields.", "error");
+    }
+  };
+
+  const handleHardDelete = async (ids, cascade = false) => {
+    await hardDeleteFields(ids, cascade);
+    setFields((prev) => prev.filter((f) => !ids.includes(f.id)));
+    reloadFieldsContext();
+    showNotification("Permanently deleted.");
+  };
+
+  const handleBatchToggleActive = async (ids, active) => {
+    try {
+      await updateFieldsActiveBatch(ids, active);
+      setFields((prev) => prev.map(f => ids.includes(f.id) ? { ...f, active } : f));
+      reloadFieldsContext();
+      showNotification(active ? "Marked as active." : "Marked as inactive.");
+    } catch (error) {
+      console.error("Failed to update active status:", error);
+      showNotification("Failed to update active status.", "error");
     }
   };
 
@@ -87,6 +106,9 @@ const FieldSection = () => {
         fields={fieldConfig}
         onUpdate={handleUpdate}
         onDeleteSelected={handleDeleteSelected}
+        onHardDeleteSelected={handleHardDelete}
+        onBatchToggleActive={handleBatchToggleActive}
+        entityName="Field"
         sortable={['name']}
         defaultSort="name"
         emptyMessage="No fields yet"

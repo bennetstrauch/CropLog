@@ -4,21 +4,26 @@ import GenericAddForm from "./GenericAddForm";
 const AddCropForm = ({ measureUnits, onAdd, onOpenMeasureUnitModal, newlyCreatedMeasureUnit, onMeasureUnitSelected }) => {
   const [cropsInput, setCropsInput] = useState("");
   const [measureUnit, setMeasureUnit] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Auto-select newly created measure unit
   useEffect(() => {
     if (newlyCreatedMeasureUnit) {
       setMeasureUnit(newlyCreatedMeasureUnit.name);
-      onMeasureUnitSelected(); // Clear the newly created flag
+      onMeasureUnitSelected();
     }
   }, [newlyCreatedMeasureUnit, onMeasureUnitSelected]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const crops = cropsInput.split(",").map((c) => c.trim());
-    onAdd(crops, measureUnit);
-
-    setCropsInput("");
-    setMeasureUnit("");
+    setIsSubmitting(true);
+    try {
+      await onAdd(crops, measureUnit);
+    } finally {
+      setCropsInput("");
+      setMeasureUnit("");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -47,6 +52,7 @@ const AddCropForm = ({ measureUnits, onAdd, onOpenMeasureUnitModal, newlyCreated
         onHelperTextClick: onOpenMeasureUnitModal
       }}
       onSubmit={handleSubmit}
+      isLoading={isSubmitting}
     />
   );
 };

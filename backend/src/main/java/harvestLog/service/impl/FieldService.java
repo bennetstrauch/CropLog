@@ -1,18 +1,26 @@
 package harvestLog.service.impl;
 
+import harvestLog.dto.DependencyConflictResponse;
 import harvestLog.dto.FieldRequest;
 import harvestLog.dto.FieldResponse;
 import harvestLog.exception.AlreadyExistsException;
+import harvestLog.exception.DependencyConflictException;
 import harvestLog.model.Farmer;
 import harvestLog.model.Field;
+import harvestLog.model.HarvestRecord;
 import harvestLog.repository.FarmerRepository;
 import harvestLog.repository.FieldRepository;
+import harvestLog.repository.HarvestRecordRepository;
 import harvestLog.service.IFieldService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -20,10 +28,12 @@ import java.util.stream.Collectors;
 public class FieldService implements IFieldService {
     private final FieldRepository fieldRepo;
     private final FarmerRepository farmerRepo;
+    private final HarvestRecordRepository harvestRecordRepo;
 
-    public FieldService(FieldRepository fieldRepo, FarmerRepository farmerRepo) {
+    public FieldService(FieldRepository fieldRepo, FarmerRepository farmerRepo, HarvestRecordRepository harvestRecordRepo) {
         this.fieldRepo = fieldRepo;
         this.farmerRepo = farmerRepo;
+        this.harvestRecordRepo = harvestRecordRepo;
     }
 
     public List<FieldResponse> getAllForFarmer(Long farmerId) {
@@ -130,6 +140,66 @@ public class FieldService implements IFieldService {
             return 0;
         }
         return fieldRepo.softDeleteByIdInAndFarmerId(ids, farmerId);
+    }
+
+    @Override
+    @Transactional
+    public void hardDeleteBatch(List<Long> ids, Long farmerId, boolean cascade) {
+        if (ids == null || ids.isEmpty()) return;
+
+        List<Field> fields = fieldRepo.findAllById(ids).stream()
+                .filter(f -> f.getFarmer().getId().equals(farmerId))
+                .collect(Collectors.toList());
+
+        if (fields.isEmpty()) return;
+
+        List<Long> validIds = fields.stream().map(Field::getId).collect(Collectors.toList());
+        Map<Long, String> fieldNameMap = fields.stream()
+                .collect(Collectors.toMap(Field::getId, Field::getName));
+
+        int affectedCount = harvestRecordRepo.countDistinctByFarmerIdAndFieldIds(farmerId, validIds);
+
+        if (affectedCount > 0 && !cascade) {
+            throw new DependencyConflictException(new DependencyConflictResponse(
+                    "These fields are referenced by harvest records",
+                    "DEPENDENCY_CONFLICT",
+                    List.of(),
+                    affectedCount,
+                    LocalDateTime.now()
+            ));
+        }
+
+        if (cascade && affectedCount > 0) {
+            List<HarvestRecord> affected = harvestRecordRepo.findDistinctByFarmerIdAndFieldIds(farmerId, validIds);
+            for (HarvestRecord record : affected) {
+                List<String> archivedNames = new ArrayList<>();
+                if (record.getArchivedFieldNames() != null && !record.getArchivedFieldNames().isBlank()) {
+                    archivedNames.addAll(Arrays.asList(record.getArchivedFieldNames().split(",")));
+                }
+                record.getFields().removeIf(f -> {
+                    if (validIds.contains(f.getId())) {
+                        String name = fieldNameMap.get(f.getId());
+                        if (name != null) archivedNames.add(name.trim());
+                        return true;
+                    }
+                    return false;
+                });
+                record.setArchivedFieldNames(archivedNames.stream()
+                        .filter(n -> !n.isBlank())
+                        .collect(Collectors.joining(",")));
+            }
+            harvestRecordRepo.saveAll(affected);
+            harvestRecordRepo.flush();
+        }
+
+        fieldRepo.deleteByIdInAndFarmerId(validIds, farmerId);
+    }
+
+    @Override
+    @Transactional
+    public void updateActiveBatch(List<Long> ids, Long farmerId, boolean active) {
+        if (ids == null || ids.isEmpty()) return;
+        fieldRepo.updateActiveStatusByIdInAndFarmerId(ids, active, farmerId);
     }
 
     private Field toEntity(FieldRequest request, Long farmerId) {

@@ -47,27 +47,40 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
   const { showNotification } = useNotification();
 
   // Actions
-  const tableActions = useHarvestTableActions(fetchEntries);
+  const handleDeleteSuccess = (ids) =>
+    setHarvestEntries(prev => prev.filter(e => !ids.includes(e.id)));
+  const tableActions = useHarvestTableActions(fetchEntries, handleDeleteSuccess);
 
   // Data enrichment
   const enrichedEntries = harvestEntries.map((entry) => {
-    const crop = cropsMap[entry.cropId];
-    const fieldNames = entry.fieldIds
+    const crop = entry.cropId ? cropsMap[entry.cropId] : null;
+    const liveFieldNames = entry.fieldIds
       .map((id) => fieldsMap[id]?.name)
       .filter(Boolean);
-    const measureUnit = measureUnitsMap[crop?.measureUnitId];
-    const measureUnitDisplay = measureUnit?.abbreviation || measureUnit?.name || "?";
+    const archivedFieldNamesList = entry.archivedFieldNames
+      ? entry.archivedFieldNames.split(',').map(n => n.trim()).filter(Boolean)
+      : [];
+    const measureUnit = crop ? measureUnitsMap[crop.measureUnitId] : null;
+    const measureUnitDisplay = measureUnit
+      ? (measureUnit.abbreviation || measureUnit.name || "?")
+      : (entry.archivedMeasureUnitName || "?");
 
     return {
       id: entry.id,
       harvestDate: entry.date,
       cropId: entry.cropId,
-      cropName: crop?.name || "Unknown Crop",
+      cropName: (entry.archived && !crop)
+        ? (entry.archivedCropName || "Deleted Crop")
+        : (crop?.name || "Unknown Crop"),
+      archivedCropName: entry.archivedCropName,
+      archivedMeasureUnitName: entry.archivedMeasureUnitName || null,
       categoryName: crop?.categoryName || "",
       quantity: entry.harvestedQuantity,
       measureUnitName: measureUnitDisplay,
-      harvestedFieldNames: fieldNames,
+      harvestedFieldNames: liveFieldNames,
+      archivedFieldNames: archivedFieldNamesList,
       fieldIds: entry.fieldIds,
+      archived: entry.archived || false,
     };
   });
 
@@ -338,7 +351,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
 
       {/* Detail Table */}
       {!loading && sortedEntries.length > 0 && !isSummaryMode && (
-        <div className="overflow-hidden">
+        <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200" style={{tableLayout: 'fixed'}}>
             <HarvestTableHeader
               sortField={sortField}
@@ -370,7 +383,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
 
       {/* Summary Table */}
       {!loading && sortedEntries.length > 0 && isSummaryMode && (
-        <div className="overflow-hidden">
+        <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200" style={{tableLayout: 'fixed'}}>
             <thead className="bg-gray-50">
               <tr>

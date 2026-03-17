@@ -6,31 +6,29 @@ import { useNotification } from "../../context/NotificationContext";
 const AddCategoryForm = ({ onCategoryAdded }) => {
   const [categoriesInput, setCategoriesInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { showNotification } = useNotification();
 
   const handleSubmit = async () => {
     setErrorMessage("");
+    const categoryNames = categoriesInput.split(",").map((c) => c.trim()).filter(name => name !== "");
+    if (categoryNames.length === 0) {
+      setErrorMessage("Please enter at least one category name.");
+      return;
+    }
 
+    setIsSubmitting(true);
     try {
-      const categoryNames = categoriesInput.split(",").map((c) => c.trim()).filter(name => name !== "");
-      if (categoryNames.length === 0) {
-        setErrorMessage("Please enter at least one category name.");
-        return;
-      }
-
       const categoryRequests = categoryNames.map(name => ({ name }));
       const newCategories = await createCategories(categoryRequests);
-
-      // Add all new categories to the context
-      if (onCategoryAdded) {
-        newCategories.forEach(category => onCategoryAdded(category));
-      }
-
+      if (onCategoryAdded) newCategories.forEach(category => onCategoryAdded(category));
       showNotification("Category added!");
       setCategoriesInput("");
     } catch (err) {
       setErrorMessage("Failed to add categories.");
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -45,6 +43,7 @@ const AddCategoryForm = ({ onCategoryAdded }) => {
         validation: (value) => value.trim() !== ""
       }}
       onSubmit={handleSubmit}
+      isLoading={isSubmitting}
       errorMessage={errorMessage}
     />
   );

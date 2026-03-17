@@ -102,6 +102,16 @@ export const deleteRequest = async (endpoint, data) => {
   }
 };
 
+export const patch = async (endpoint, data) => {
+  try {
+    const response = await API.patch(endpoint, data);
+    return response.data;
+  } catch (error) {
+    console.error("PATCH request error:", endpoint, "|", error.message);
+    throw error;
+  }
+};
+
 // --- App-Specific API Calls ---
 
 /**

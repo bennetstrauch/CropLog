@@ -1,12 +1,12 @@
 package harvestLog.controller;
 
+import harvestLog.dto.BatchActiveRequest;
 import harvestLog.dto.CategoryRequest;
 import harvestLog.dto.CategoryResponse;
-import harvestLog.model.Farmer;
+import harvestLog.dto.HardDeleteRequest;
 import harvestLog.service.ICategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -76,5 +76,19 @@ public class CategoryController {
         Long farmerId = getAuthenticatedFarmerId();
         int deletedCount = categoryService.deleteBatch(ids, farmerId);
         return deletedCount > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/batch/hard")
+    public ResponseEntity<Void> hardDeleteBatch(@RequestBody HardDeleteRequest request) {
+        Long farmerId = getAuthenticatedFarmerId();
+        categoryService.hardDeleteBatch(request.ids(), farmerId, request.cascade());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/batch/active")
+    public ResponseEntity<Void> updateActiveBatch(@RequestBody BatchActiveRequest request) {
+        Long farmerId = getAuthenticatedFarmerId();
+        categoryService.updateActiveBatch(request.ids(), farmerId, request.active());
+        return ResponseEntity.noContent().build();
     }
 }

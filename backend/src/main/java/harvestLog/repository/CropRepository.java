@@ -43,4 +43,15 @@ public interface CropRepository extends JpaRepository<Crop, Long> {
     @Modifying
     @Query("DELETE FROM Crop c WHERE c.id IN :ids AND c.farmer.id = :farmerId")
     int deleteByIdInAndFarmerId(@Param("ids") List<Long> ids, @Param("farmerId") Long farmerId);
+
+    // Find crops by measure unit ids (for cascade delete)
+    List<Crop> findByMeasureUnit_IdInAndFarmerId(List<Long> unitIds, Long farmerId);
+
+    // Find crops by category ids (for cascade delete)
+    List<Crop> findByCategory_IdInAndFarmerId(List<Long> catIds, Long farmerId);
+
+    // Batch active toggle
+    @Modifying
+    @Query("UPDATE Crop c SET c.active = :active WHERE c.id IN :ids AND c.farmer.id = :farmerId")
+    int updateActiveStatusByIdInAndFarmerId(@Param("ids") List<Long> ids, @Param("active") boolean active, @Param("farmerId") Long farmerId);
 }

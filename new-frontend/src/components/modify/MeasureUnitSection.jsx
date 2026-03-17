@@ -1,8 +1,7 @@
-
 import React from "react";
 import AddMeasureUnitForm from "./AddMeasureUnitForm";
 import GenericEntityList from "./GenericEntityList";
-import { updateMeasureUnit, deleteMeasureUnits } from "../../service/modifyService";
+import { updateMeasureUnit, deleteMeasureUnits, hardDeleteMeasureUnits, updateMeasureUnitsActiveBatch } from "../../service/modifyService";
 import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
 import { useNotification } from "../../context/NotificationContext";
 
@@ -41,10 +40,27 @@ const MeasureUnitSection = () => {
     try {
       await deleteMeasureUnits(ids);
       setMeasureUnits((prev) => prev.filter((u) => !ids.includes(u.id)));
-      showNotification("Deleted.");
+      showNotification("Marked as inactive.");
     } catch (error) {
       console.error("Failed to delete measure units:", error);
       showNotification("Failed to delete measure units.", "error");
+    }
+  };
+
+  const handleHardDelete = async (ids, cascade = false) => {
+    await hardDeleteMeasureUnits(ids, cascade);
+    setMeasureUnits((prev) => prev.filter((u) => !ids.includes(u.id)));
+    showNotification("Permanently deleted.");
+  };
+
+  const handleBatchToggleActive = async (ids, active) => {
+    try {
+      await updateMeasureUnitsActiveBatch(ids, active);
+      setMeasureUnits((prev) => prev.map(u => ids.includes(u.id) ? { ...u, active } : u));
+      showNotification(active ? "Marked as active." : "Marked as inactive.");
+    } catch (error) {
+      console.error("Failed to update active status:", error);
+      showNotification("Failed to update active status.", "error");
     }
   };
 
@@ -75,6 +91,9 @@ const MeasureUnitSection = () => {
         fields={fieldConfig}
         onUpdate={handleUpdate}
         onDeleteSelected={handleDeleteSelected}
+        onHardDeleteSelected={handleHardDelete}
+        onBatchToggleActive={handleBatchToggleActive}
+        entityName="Measure Unit"
         sortable={['name', 'abbreviation']}
         defaultSort="name"
         emptyMessage="No measure units yet"

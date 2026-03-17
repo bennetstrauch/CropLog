@@ -1,4 +1,4 @@
-import { get, post, put, deleteRequest } from "./apiService";
+import { get, post, put, deleteRequest, patch } from "./apiService";
 
 
 // return array of measure unit objects or strings depending on backend
@@ -71,6 +71,32 @@ export const deleteCategories = async (ids) => {
 export const deleteFields = async (ids) => {
   return deleteRequest("fields/batch", ids);
 };
+
+// Hard delete (permanent) functions
+export const hardDeleteCrops = (ids, cascade) =>
+  deleteRequest("crops/batch/hard", { ids, cascade });
+
+export const hardDeleteFields = (ids, cascade) =>
+  deleteRequest("fields/batch/hard", { ids, cascade });
+
+export const hardDeleteCategories = (ids, cascade) =>
+  deleteRequest("categories/batch/hard", { ids, cascade });
+
+export const hardDeleteMeasureUnits = (ids, cascade) =>
+  deleteRequest("measure-units/batch/hard", { ids, cascade });
+
+// Batch active toggle functions
+export const updateCropsActiveBatch = (ids, active) =>
+  patch("crops/batch/active", { ids, active });
+
+export const updateFieldsActiveBatch = (ids, active) =>
+  patch("fields/batch/active", { ids, active });
+
+export const updateCategoriesActiveBatch = (ids, active) =>
+  patch("categories/batch/active", { ids, active });
+
+export const updateMeasureUnitsActiveBatch = (ids, active) =>
+  patch("measure-units/batch/active", { ids, active });;
 
 
 

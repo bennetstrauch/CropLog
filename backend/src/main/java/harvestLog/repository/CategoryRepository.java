@@ -35,4 +35,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Modifying
     @Query("DELETE FROM Category c WHERE c.id IN :ids AND c.farmer.id = :farmerId")
     int deleteByIdInAndFarmerId(@Param("ids") List<Long> ids, @Param("farmerId") Long farmerId);
+
+    // Batch active toggle
+    @Modifying
+    @Query("UPDATE Category c SET c.active = :active WHERE c.id IN :ids AND c.farmer.id = :farmerId")
+    int updateActiveStatusByIdInAndFarmerId(@Param("ids") List<Long> ids, @Param("active") boolean active, @Param("farmerId") Long farmerId);
 }

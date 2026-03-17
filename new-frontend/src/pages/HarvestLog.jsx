@@ -15,7 +15,7 @@ const HarvestLog = () => {
   
 
   return (
-    <div className="min-h-screen w-full p-0 m-0 fixed inset-0 bg-white">
+    <div className="w-full p-0 m-0 fixed inset-0 bg-white overflow-y-auto">
         <HarvestLogTableRefactored dateRange={dateRange} setDateRange={setDateRange} />
     </div>
   )

@@ -7,16 +7,14 @@ const AddMeasureUnitForm = ({ onAdded }) => {
   const [name, setName] = useState("");
   const [abbreviation, setAbbreviation] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { showNotification } = useNotification();
 
   const handleSubmit = async () => {
     setErrorMessage("");
-
+    setIsSubmitting(true);
     try {
-      const unitToPost = {
-        name: name.trim(),
-        abbreviation: abbreviation.trim(),
-      };
+      const unitToPost = { name: name.trim(), abbreviation: abbreviation.trim() };
       const newUnit = await createMeasureUnit(unitToPost);
       if (onAdded) onAdded(newUnit);
       showNotification("Measure unit added!");
@@ -25,6 +23,8 @@ const AddMeasureUnitForm = ({ onAdded }) => {
     } catch (err) {
       console.error(err);
       setErrorMessage("Failed to add measure unit.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -47,6 +47,7 @@ const AddMeasureUnitForm = ({ onAdded }) => {
         }
       ]}
       onSubmit={handleSubmit}
+      isLoading={isSubmitting}
       errorMessage={errorMessage}
     />
   );

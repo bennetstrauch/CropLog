@@ -22,6 +22,7 @@ const GenericAddForm = ({
 
   // Form submission
   onSubmit,
+  isLoading = false,
 
   // Error handling
   errorMessage = "",
@@ -41,6 +42,7 @@ const GenericAddForm = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isLoading) return;
 
     // Validate primary input
     if (!primaryValidation(primaryValue)) {
@@ -146,9 +148,9 @@ const GenericAddForm = ({
               <button
                 type="submit"
                 className="w-full px-4 py-2 !bg-teal-700 text-white font-semibold rounded-lg hover:!bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!isFormValid}
+                disabled={!isFormValid || isLoading}
               >
-                {buttonText}
+                {isLoading ? 'Adding...' : buttonText}
               </button>
             </div>
           </div>

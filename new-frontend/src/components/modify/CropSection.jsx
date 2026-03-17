@@ -10,6 +10,8 @@ import {
   updateCrop,
   getMeasureUnits,
   getCategories,
+  hardDeleteCrops,
+  updateCropsActiveBatch,
 } from "../../service/modifyService";
 import { useCrops } from "../../context/CropsProvider";
 import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
@@ -86,9 +88,25 @@ const CropSection = () => {
     try {
       await deleteCrops(ids);
       setCrops((prev) => prev.filter((c) => !ids.includes(c.id)));
-      showNotification("Deleted.");
+      showNotification("Marked as inactive.");
     } catch {
       showNotification("Failed to delete crops.", "error");
+    }
+  };
+
+  const handleHardDeleteCrops = async (ids, cascade = false) => {
+    await hardDeleteCrops(ids, cascade);
+    setCrops((prev) => prev.filter((c) => !ids.includes(c.id)));
+    showNotification("Permanently deleted.");
+  };
+
+  const handleBatchToggleCropsActive = async (ids, active) => {
+    try {
+      await updateCropsActiveBatch(ids, active);
+      setCrops((prev) => prev.map(c => ids.includes(c.id) ? { ...c, active } : c));
+      showNotification(active ? "Marked as active." : "Marked as inactive.");
+    } catch {
+      showNotification("Failed to update active status.", "error");
     }
   };
 
@@ -143,6 +161,8 @@ const CropSection = () => {
         categories={categories}
         onUpdateCrop={handleUpdateCrop}
         onDeleteSelected={handleDeleteCrops}
+        onHardDeleteSelected={handleHardDeleteCrops}
+        onBatchToggleActive={handleBatchToggleCropsActive}
         loading={cropsLoading}
       />
 
