@@ -4,8 +4,7 @@ import { triggerLogout } from "./authUtils";
 
 // Create an Axios instance
 const API = axios.create({
-  baseURL: 'http://localhost:8080/api/',
-  // baseURL: "https://harvest-log.onrender.com/api/",
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
 // Use an interceptor to add the auth token to every request
