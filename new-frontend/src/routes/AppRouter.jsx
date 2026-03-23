@@ -16,7 +16,7 @@ import ResetPassword from "../authentification/ResetPassword";
 import MainPageRefactored from "../pages/MainPageRefactored";
 import HarvestLog from "../pages/HarvestLog";
 import NotFoundPage from "../pages/NotFoundPage"; // A component for 404 errors
-import FinalizeEntry from "../Components/newHarvestEntry/finalizeEntry";
+import FinalizeEntry from "../components/newHarvestEntry/FinalizeEntry";
 import ModifyValues from "../components/modify/ModifyValues";
 
 import CropSection from "../components/modify/CropSection";
