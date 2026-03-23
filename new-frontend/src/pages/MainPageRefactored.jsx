@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../App.css";
 import "../index.css";
 import { validateDate } from "../service/utils";
-import SelectCrop from "../Components/newHarvestEntry/SelectCrop";
+import SelectCrop from "../components/newHarvestEntry/SelectCrop";
 import useHarvestForm from "../components/newHarvestEntry/useHarvestForm";
 import useHarvestSubmit from "../components/newHarvestEntry/useHarvestSubmit";
 import useUIVisibility from "../components/newHarvestEntry/useUIVisibility";
