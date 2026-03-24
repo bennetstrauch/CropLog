@@ -48,7 +48,9 @@ API.interceptors.response.use(
  */
 export function getErrorMessage(err) {
   if (!err.response) {
-    return 'Connection failed. Please check your internet.';
+    return navigator.onLine
+      ? 'Service is currently unavailable. Please try again later.'
+      : 'No internet connection. Please check your network.';
   }
   return err.response?.data?.message || 'Something went wrong. Please try again.';
 }
@@ -166,6 +168,10 @@ export async function deleteHarvestRecords(ids) {
 
 
 // You'll also need auth-specific calls
+export const getMyProfile = () => get("farmers/me");
+export const updateMyName = (name) => patch("farmers/me", { name });
+export const getPlanInfo = () => get("plan");
+
 export const loginUser = (credentials) => post("auth/login", credentials);
 export const registerUser = (userData) => post("auth/register", userData);
 export const verifyEmail = (token) => API.get(`auth/verify?token=${token}`);

@@ -25,6 +25,7 @@ import MeasureUnitSection from "../components/modify/MeasureUnitSection";
 import CategorySection from "../components/modify/CategorySection";
 import { CategoriesProvider } from "../context/CategoriesProvider";
 import AppProviders from "../context/AppProviders";
+import Profile from "../pages/Profile";
 
 // Path Constants
 export const Path_HarvestLog = "/harvest-log";
@@ -60,6 +61,8 @@ function AppRouter() {
               <Route path={Path_NewEntry} element={<MainPageRefactored />} />
               <Route path={Path_HarvestLog} element={<HarvestLog />} />
               <Route path={`${Path_NewEntry}/:cropName`} element={<FinalizeEntry />} />
+
+              <Route path="/profile" element={<Profile />} />
 
               <Route path={Path_Modify} element={<ModifyLayout />}>
                 <Route index element={<CropSection />} />
