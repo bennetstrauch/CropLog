@@ -1,14 +1,25 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+function isTokenExpired(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
+
 // Check for the token in localStorage to define the initial state
-const token = localStorage.getItem('jwt_token');
+const storedToken = localStorage.getItem('jwt_token');
+const token = storedToken && !isTokenExpired(storedToken) ? storedToken : null;
+if (!token) localStorage.removeItem('jwt_token'); // clean up expired token
 
 const initialState = {
-  // The user is logged in if a token exists.
-  loggedIn: !!token, 
+  // The user is logged in only if a valid, non-expired token exists.
+  loggedIn: !!token,
   token: token,
   // You could also store user info here
-  user: null, 
+  user: null,
 };
 
 export const authSlice = createSlice({
