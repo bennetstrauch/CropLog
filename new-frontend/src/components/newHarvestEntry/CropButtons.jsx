@@ -9,7 +9,7 @@ const Path_ModifyCrops = "/modify/crops";
 
 function CropButtons({ harvestDate, harvestedFieldsRef }) {
   const navigate = useNavigate();
-  const { crops, loading } = useCrops();
+  const { crops, loading, error } = useCrops();
 
   //#bessere Namen für Handle click function
   const handleClick = (crop) => {
@@ -26,6 +26,14 @@ function CropButtons({ harvestDate, harvestedFieldsRef }) {
       <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "4px 0" }}>
         <Spinner size="sm" />
         <span style={{ fontSize: "0.875rem", color: "#9ca3af" }}>Loading crops...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: "8px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+        <span style={{ fontSize: "0.875rem", color: "#ef4444" }}>⚠ Server unavailable. Retrying…</span>
       </div>
     );
   }

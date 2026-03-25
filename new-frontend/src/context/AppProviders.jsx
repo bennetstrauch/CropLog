@@ -7,19 +7,31 @@ import { MeasureUnitsProvider } from "./MeasureUnitsProvider";
 import { CategoriesProvider } from "./CategoriesProvider";
 import { NotificationProvider } from "./NotificationContext";
 import { TutorialProvider } from "./TutorialContext";
+import { PlanProvider, usePlan } from "./PlanProvider";
+import PlanOverageModal from "../components/plan/PlanOverageModal";
+
+function BlockingOverlay() {
+  const { isBlocking, isOverLimit, loading } = usePlan();
+  if (loading || !isOverLimit) return null;
+  return <PlanOverageModal blocking={isBlocking} />;
+}
 
 export default function AppProviders({ children }) {
-  // Priority loading: Crops first, then fields, measure units, and categories load independently in background
   return (
     <NotificationProvider>
       <TutorialProvider>
-        <CropsProvider>
-          <FieldsProvider>
-            <MeasureUnitsProvider>
-              <CategoriesProvider>{children ?? <Outlet />}</CategoriesProvider>
-            </MeasureUnitsProvider>
-          </FieldsProvider>
-        </CropsProvider>
+        <PlanProvider>
+          <CropsProvider>
+            <FieldsProvider>
+              <MeasureUnitsProvider>
+                <CategoriesProvider>
+                  <BlockingOverlay />
+                  {children ?? <Outlet />}
+                </CategoriesProvider>
+              </MeasureUnitsProvider>
+            </FieldsProvider>
+          </CropsProvider>
+        </PlanProvider>
       </TutorialProvider>
     </NotificationProvider>
   );

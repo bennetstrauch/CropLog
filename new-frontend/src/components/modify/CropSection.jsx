@@ -17,12 +17,15 @@ import { useCrops } from "../../context/CropsProvider";
 import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
 import { useCategories } from "../../context/CategoriesProvider";
 import { useNotification } from "../../context/NotificationContext";
+import { usePlan } from "../../context/PlanProvider";
 
 const CropSection = () => {
-  const { crops, setCrops, loading: cropsLoading } = useCrops();
+  const { crops, setCrops, loading: cropsLoading, error: cropsError } = useCrops();
   const { measureUnits, setMeasureUnits } = useMeasureUnits();
   const { categories, setCategories } = useCategories();
   const { showNotification } = useNotification();
+  const { overage } = usePlan();
+  const inputsDisabled = overage.crops > 0;
 
   const [pendingCrops, setPendingCrops] = useState([]); // holds crops that need category resolution
   const [modalOpen, setModalOpen] = useState(false);
@@ -153,6 +156,7 @@ const CropSection = () => {
         onOpenMeasureUnitModal={handleOpenMeasureUnitModal}
         newlyCreatedMeasureUnit={newlyCreatedMeasureUnit}
         onMeasureUnitSelected={() => setNewlyCreatedMeasureUnit(null)}
+        disabled={inputsDisabled}
       />
 
       <CropList
@@ -164,6 +168,7 @@ const CropSection = () => {
         onHardDeleteSelected={handleHardDeleteCrops}
         onBatchToggleActive={handleBatchToggleCropsActive}
         loading={cropsLoading}
+        error={cropsError}
       />
 
       {modalOpen && pendingCrops.length > 0 && (

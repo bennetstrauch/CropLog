@@ -3,7 +3,7 @@ import Spinner from "../universal/Spinner";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import DependencyWarningModal from "./DependencyWarningModal";
 
-const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelected, onHardDeleteSelected, onBatchToggleActive, loading = false }) => {
+const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelected, onHardDeleteSelected, onBatchToggleActive, loading = false, error = false }) => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [editingCrop, setEditingCrop] = useState(null);
   const [editingName, setEditingName] = useState("");
@@ -217,6 +217,16 @@ const CropList = ({ crops, measureUnits, categories, onUpdateCrop, onDeleteSelec
         <div className="px-6 py-12 flex flex-col items-center gap-3">
           <Spinner size="lg" />
           <p className="text-gray-400 text-sm">Loading...</p>
+        </div>
+      ) : error ? (
+        <div className="px-6 py-12 text-center">
+          <div className="text-red-400 mb-2">
+            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+          </div>
+          <h3 className="text-red-500 font-medium">Server unavailable</h3>
+          <p className="text-gray-400 text-sm">Could not reach the server. Retrying automatically…</p>
         </div>
       ) : crops.length === 0 ? (
         <div className="px-6 py-12 text-center">

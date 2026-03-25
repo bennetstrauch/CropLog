@@ -8,7 +8,10 @@
       "Bash(mvn:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Skill(update-config)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -r \"403\\\\|402\\\\|plan\\\\|PlanLimit\" /c/Projects/CropLog/new-frontend/src --include=*.js --include=*.jsx --include=*.ts --include=*.tsx)"
     ],
     "deny": [],
     "ask": []

@@ -33,7 +33,8 @@ API.interceptors.response.use(
   },
   (error) => {
     const hasToken = !!localStorage.getItem("jwt_token");
-    if (hasToken && error.response && (error.response.status === 401 || error.response.status === 403)) {
+    if (hasToken && error.response && (error.response.status === 401 ||
+        (error.response.status === 403 && error.response.data?.code !== 'PLAN_LIMIT_EXCEEDED'))) {
       triggerLogout();
     }
     return Promise.reject(error);
@@ -171,6 +172,9 @@ export async function deleteHarvestRecords(ids) {
 export const getMyProfile = () => get("farmers/me");
 export const updateMyName = (name) => patch("farmers/me", { name });
 export const getPlanInfo = () => get("plan");
+
+export const trimToFree = (keepCropIds, keepFieldIds, keepMeasureUnitIds) =>
+  post("plan/trim-to-free", { keepCropIds, keepFieldIds, keepMeasureUnitIds });
 
 export const loginUser = (credentials) => post("auth/login", credentials);
 export const registerUser = (userData) => post("auth/register", userData);

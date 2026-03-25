@@ -28,7 +28,10 @@ const GenericAddForm = ({
   errorMessage = "",
 
   // Custom styling
-  className = ""
+  className = "",
+
+  // Disable entire form
+  disabled = false
 }) => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
@@ -73,7 +76,7 @@ const GenericAddForm = ({
   const isFormValid = isPrimaryValid && isSecondaryValid && areAdditionalInputsValid;
 
   return (
-    <div className={`bg-white/90 rounded-2xl shadow-sm border border-gray-200 p-6 mb-6 ${className}`}>
+    <div className={`bg-white/90 rounded-2xl shadow-sm border border-gray-200 p-6 mb-6 ${disabled ? "opacity-50 pointer-events-none" : ""} ${className}`}>
       <form onSubmit={handleSubmit} className="flex flex-wrap gap-4 items-start">
         {/* PRIMARY INPUT */}
         <div className="flex-1 min-w-[300px]">
@@ -84,6 +87,7 @@ const GenericAddForm = ({
             placeholder={primaryPlaceholder}
             className="w-full px-3 py-2 border-0 rounded-lg bg-yellow-50/100 text-gray-900 placeholder-gray-400 placeholder:text-sm focus:outline-none focus:border-teal-500 transition-all duration-200"
             required
+            disabled={disabled}
           />
           {primaryHelperText && (
             <p className="text-xs text-gray-500 mt-1 italic">

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getEntriesFilteredBy } from "../../service/apiService";
 import { useCrops } from "../../context/CropsProvider";
@@ -26,6 +26,8 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
   // State
   const [harvestEntries, setHarvestEntries] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
+  const retryIntervalRef = useRef(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [sortField, setSortField] = useState('harvestDate');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -74,7 +76,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
         : (crop?.name || "Unknown Crop"),
       archivedCropName: entry.archivedCropName,
       archivedMeasureUnitName: entry.archivedMeasureUnitName || null,
-      categoryName: crop?.categoryName || "",
+      categoryName: crop?.categoryName || entry.archivedCategoryName || "",
       quantity: entry.harvestedQuantity,
       measureUnitName: measureUnitDisplay,
       harvestedFieldNames: liveFieldNames,
@@ -129,24 +131,42 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
       return summarySortDirection === 'asc' ? cmp : -cmp;
     });
 
-  // Effects
-  useEffect(() => {
-    fetchEntries();
-  }, [dateRange]);
-
   // Data fetching
-  async function fetchEntries() {
+  const fetchEntries = useCallback(async () => {
     setLoading(true);
     try {
       const fetchedEntries = await getEntriesFilteredBy(dateRange);
       setHarvestEntries(fetchedEntries);
+      setFetchError(false);
     } catch (error) {
       console.error("Failed to fetch harvest entries:", error);
       setHarvestEntries([]);
+      setFetchError(true);
     } finally {
       setLoading(false);
     }
-  }
+  }, [dateRange]);
+
+  // Effects
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
+
+  // Auto-retry every 5 seconds on error
+  useEffect(() => {
+    if (!fetchError) {
+      if (retryIntervalRef.current) {
+        clearInterval(retryIntervalRef.current);
+        retryIntervalRef.current = null;
+      }
+      return;
+    }
+    retryIntervalRef.current = setInterval(fetchEntries, 5000);
+    return () => {
+      clearInterval(retryIntervalRef.current);
+      retryIntervalRef.current = null;
+    };
+  }, [fetchError, fetchEntries]);
 
   // Event handlers
   const handleSort = (field) => {
@@ -336,8 +356,21 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
         </div>
       )}
 
+      {/* Error State */}
+      {!loading && fetchError && (
+        <div className="px-6 py-12 text-center">
+          <div className="text-red-400 mb-2">
+            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+          </div>
+          <h3 className="text-red-500 font-medium">Server unavailable</h3>
+          <p className="text-gray-400 text-sm">Could not reach the server. Retrying automatically…</p>
+        </div>
+      )}
+
       {/* Empty State */}
-      {!loading && sortedEntries.length === 0 && (
+      {!loading && !fetchError && sortedEntries.length === 0 && (
         <div className="px-6 py-12 text-center">
           <div className="text-gray-400 mb-2">
             <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">

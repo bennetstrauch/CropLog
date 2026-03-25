@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import GenericAddForm from "./GenericAddForm";
 
-const AddCropForm = ({ measureUnits, onAdd, onOpenMeasureUnitModal, newlyCreatedMeasureUnit, onMeasureUnitSelected }) => {
+const AddCropForm = ({ measureUnits, onAdd, onOpenMeasureUnitModal, newlyCreatedMeasureUnit, onMeasureUnitSelected, disabled = false }) => {
   const [cropsInput, setCropsInput] = useState("");
   const [measureUnit, setMeasureUnit] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +53,7 @@ const AddCropForm = ({ measureUnits, onAdd, onOpenMeasureUnitModal, newlyCreated
       }}
       onSubmit={handleSubmit}
       isLoading={isSubmitting}
+      disabled={disabled}
     />
   );
 };
