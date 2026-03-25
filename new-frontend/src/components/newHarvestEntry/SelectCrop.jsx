@@ -3,10 +3,12 @@ import CropButtons from "./CropButtons";
 import { getCurrentDate } from "../../service/utils";
 import { getLatestHarvestRecord } from "../../service/apiService";
 import { useCrops } from "../../context/CropsProvider";
+import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
 
 const SelectCrop = ({ harvestDate, setHarvestDate, harvestedFieldsRef }) => {
   const dateInputRef = useRef(null);
   const { crops } = useCrops();
+  const { measureUnitsMap } = useMeasureUnits();
   const [latestEntry, setLatestEntry] = useState(null);
 
   const today = getCurrentDate();
@@ -39,8 +41,8 @@ const SelectCrop = ({ harvestDate, setHarvestDate, harvestedFieldsRef }) => {
       const time = latestEntry.createdAt.slice(11, 16);
       const crop = crops.find(c => c.id === latestEntry.cropId);
       const cropName = crop?.name || latestEntry.archivedCropName || "—";
-      const unit = crop?.measureUnit?.abbreviation || crop?.measureUnit?.name
-        || latestEntry.archivedMeasureUnitName || "";
+      const mu = measureUnitsMap[crop?.measureUnitId];
+      const unit = mu?.abbreviation || mu?.name || latestEntry.archivedMeasureUnitName || "";
       latestLine = `${time} · ${cropName} · ${latestEntry.harvestedQuantity}${unit ? " " + unit : ""}`;
     }
   }
