@@ -11,6 +11,12 @@ const tutorialSteps = [
     position: "bottom",
   },
   {
+    targetSelector: "#harvest-entry-form",
+    title: "Change the Date",
+    description: "Entries default to today. Tap the green date to pick a different day — useful for logging a past harvest.",
+    position: "bottom",
+  },
+  {
     targetSelector: "#nav-manage",
     title: "Set Up Your Data First",
     description: "Before you can log entries, you'll need to set up your Crops, Fields, and Measure Units here.",

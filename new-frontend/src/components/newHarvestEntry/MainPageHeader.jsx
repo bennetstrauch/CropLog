@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../reduxStore/Slices/AuthSlice';
-import { Path_HarvestLog } from '../../routes/AppRouter';
+import { Path_HarvestLog, Path_Modify } from '../../routes/AppRouter';
 
 export default function MainPageHeader({
   visibility,
@@ -89,14 +89,16 @@ export default function MainPageHeader({
       )}
 
       {visibility.beforeCropSelection && (
-        <button onClick={() => navigate(Path_HarvestLog)}>
-          Harvest Log
-        </button>
+        <>
+          <button onClick={() => navigate(Path_HarvestLog)}>
+            Harvest Log
+          </button>
+          <button id="nav-manage" onClick={() => navigate(Path_Modify)}>
+            Manage
+          </button>
+        </>
       )}
 
-      {visibility.beforeCropSelection && (
-        <ModifyDateButton harvestDate={harvestDate} setHarvestDate={setHarvestDate} />
-      )}
 
     </header>
   );

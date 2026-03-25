@@ -96,7 +96,7 @@ function MainPage() {
       <br />
 
       <div id="harvest-entry-form">
-        <SelectCrop harvestedFieldsRef={harvestedFieldsRef} harvestDate={harvestDate} />
+        <SelectCrop harvestedFieldsRef={harvestedFieldsRef} harvestDate={harvestDate} setHarvestDate={setHarvestDate} />
       </div>
 
       <TutorialOverlay />
