@@ -48,6 +48,22 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
   const { measureUnitsMap } = useMeasureUnits();
   const { showNotification } = useNotification();
 
+  // Data fetching
+  const fetchEntries = useCallback(async () => {
+    setLoading(true);
+    try {
+      const fetchedEntries = await getEntriesFilteredBy(dateRange);
+      setHarvestEntries(fetchedEntries);
+      setFetchError(false);
+    } catch (error) {
+      console.error("Failed to fetch harvest entries:", error);
+      setHarvestEntries([]);
+      setFetchError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [dateRange]);
+
   // Actions
   const handleDeleteSuccess = (ids) =>
     setHarvestEntries(prev => prev.filter(e => !ids.includes(e.id)));
@@ -130,22 +146,6 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
         : aVal - bVal;
       return summarySortDirection === 'asc' ? cmp : -cmp;
     });
-
-  // Data fetching
-  const fetchEntries = useCallback(async () => {
-    setLoading(true);
-    try {
-      const fetchedEntries = await getEntriesFilteredBy(dateRange);
-      setHarvestEntries(fetchedEntries);
-      setFetchError(false);
-    } catch (error) {
-      console.error("Failed to fetch harvest entries:", error);
-      setHarvestEntries([]);
-      setFetchError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [dateRange]);
 
   // Effects
   useEffect(() => {
