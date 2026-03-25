@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { getMyProfile, updateMyName, getPlanInfo, getErrorMessage } from '../service/apiService';
 import Spinner from '../components/universal/Spinner';
 
-// Inject fonts + responsive grid styles once
+// Inject responsive grid styles once
 if (!document.getElementById('profile-styles')) {
   const el = document.createElement('style');
   el.id = 'profile-styles';
   el.textContent = `
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap');
     .profile-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -26,7 +25,7 @@ if (!document.getElementById('profile-styles')) {
 const PLAN_CONFIG = {
   FARM_PAID:  { label: 'Farm Plan', bg: 'linear-gradient(135deg,#92400e,#78350f)', text: '#fde68a', ring: '#d97706' },
   FARM_TRIAL: { label: 'Trial',     bg: 'linear-gradient(135deg,#1e3a5f,#1e3a5f)', text: '#93c5fd', ring: '#3b82f6' },
-  FREE:       { label: 'Free Plan', bg: 'linear-gradient(135deg,#1f2937,#111827)', text: '#9ca3af', ring: '#374151' },
+  FREE:       { label: 'Free Plan', bg: 'linear-gradient(135deg,#2d5a27,#1e4019)', text: '#d4f0d0', ring: '#4a8a42' },
 };
 
 export default function Profile() {
@@ -79,7 +78,7 @@ export default function Profile() {
   if (error) return (
     <div style={{ minHeight: '100vh', padding: 32 }}>
       <BackBtn onClick={() => navigate(-1)} fixed />
-      <p style={{ color: '#f87171', marginTop: 80, fontFamily: '"DM Sans", sans-serif' }}>{error}</p>
+      <p style={{ color: '#f87171', marginTop: 80 }}>{error}</p>
     </div>
   );
 
@@ -94,19 +93,15 @@ export default function Profile() {
   const showUpgrade = !isPaid;
 
   return (
-    <div style={{ minHeight: '100vh', fontFamily: '"DM Sans", sans-serif', padding: '72px 20px 60px', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', padding: '16px 20px 40px', position: 'relative', overflow: 'hidden' }}>
 
       {/* Fixed back button — top left */}
       <BackBtn onClick={() => navigate(-1)} fixed />
 
-      {/* Ambient blobs */}
-      <div style={{ position: 'fixed', top: -120, right: -80, width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(74,124,54,0.25) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'fixed', bottom: -60, left: -100, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(200,169,110,0.12) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 0 }} />
-
       <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto' }}>
 
         {/* Page title */}
-        <h1 style={{ fontFamily: '"Playfair Display", serif', fontSize: 28, fontWeight: 700, color: '#f0ebe0', margin: '0 0 24px', letterSpacing: '-0.01em' }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: '#f0ebe0', margin: '44px 0 24px', letterSpacing: '-0.01em' }}>
           Your Profile
         </h1>
 
@@ -118,11 +113,11 @@ export default function Profile() {
 
             {/* Avatar hero */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px', background: 'rgba(255,255,255,0.04)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.07)' }}>
-              <div style={{ flexShrink: 0, width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg,#3a6b2e,#2a5020)', border: '2px solid #c8a96e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700, color: '#f0ebe0', fontFamily: '"Playfair Display", serif' }}>
+              <div style={{ flexShrink: 0, width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg,#3a6b2e,#2a5020)', border: '2px solid #c8a96e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700, color: '#f0ebe0' }}>
                 {initials}
               </div>
               <div style={{ minWidth: 0 }}>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: 'rgba(200,169,110,0.7)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>Farmer</p>
+                <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: '#e8c47a', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>Farmer</p>
                 <p style={{ margin: 0, fontSize: 17, fontWeight: 600, color: '#f0ebe0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.name}</p>
               </div>
             </div>
@@ -132,7 +127,7 @@ export default function Profile() {
 
               {/* Name */}
               <div style={{ padding: '16px 20px' }}>
-                <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 600, color: 'rgba(200,169,110,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Name</p>
+                <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 600, color: '#e8c47a', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Name</p>
                 {editingName ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -141,7 +136,7 @@ export default function Profile() {
                         onChange={e => setNameInput(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') handleCancelEdit(); }}
                         autoFocus
-                        style={{ flex: 1, padding: '8px 12px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(200,169,110,0.4)', borderRadius: 8, fontSize: 14, color: '#f0ebe0', outline: 'none', fontFamily: '"DM Sans", sans-serif' }}
+                        style={{ flex: 1, padding: '8px 12px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(200,169,110,0.4)', borderRadius: 8, fontSize: 14, color: '#f0ebe0', outline: 'none' }}
                       />
                       <ActionBtn onClick={handleSaveName} disabled={saveLoading} accent>
                         {saveLoading ? <Spinner size="sm" /> : 'Save'}
@@ -153,7 +148,7 @@ export default function Profile() {
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: 15, color: '#f0ebe0' }}>{profile.name}</span>
-                    <button onClick={() => setEditingName(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: '#c8a96e', padding: '4px 8px', fontFamily: '"DM Sans", sans-serif' }}>
+                    <button onClick={() => setEditingName(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: '#e8c47a', padding: '4px 8px' }}>
                       Edit
                     </button>
                   </div>
@@ -165,7 +160,7 @@ export default function Profile() {
 
               {/* Email */}
               <div style={{ padding: '16px 20px' }}>
-                <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 600, color: 'rgba(200,169,110,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Email</p>
+                <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 600, color: '#e8c47a', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Email</p>
                 <span style={{ fontSize: 15, color: 'rgba(240,235,224,0.6)' }}>{profile.email}</span>
               </div>
             </div>
@@ -176,7 +171,7 @@ export default function Profile() {
             <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
               <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
 
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: 'rgba(200,169,110,0.7)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: '#e8c47a', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                   Subscription
                 </p>
 
@@ -187,7 +182,7 @@ export default function Profile() {
                 {/* Trial countdown */}
                 {isOnTrial && trialDate && (
                   <div style={{ textAlign: 'center' }}>
-                    <p style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: daysLeft <= 14 ? '#fca5a5' : '#f0ebe0', fontFamily: '"Playfair Display", serif' }}>
+                    <p style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: daysLeft <= 14 ? '#fca5a5' : '#f0ebe0' }}>
                       {daysLeft}
                     </p>
                     <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
@@ -239,13 +234,12 @@ export default function Profile() {
                       display: 'block',
                       textAlign: 'center',
                       padding: '11px 16px',
-                      background: 'linear-gradient(135deg,#c8a96e,#a07840)',
+                      background: 'linear-gradient(135deg,#f0c96a,#d4a043)',
                       color: '#1b2e1b',
                       borderRadius: 10,
                       fontSize: 14,
                       fontWeight: 700,
                       textDecoration: 'none',
-                      fontFamily: '"DM Sans", sans-serif',
                       letterSpacing: '0.02em',
                     }}
                   >
@@ -277,7 +271,6 @@ function BackBtn({ onClick, fixed }) {
         cursor: 'pointer',
         color: 'rgba(240,235,224,0.75)',
         fontSize: 13,
-        fontFamily: '"DM Sans", sans-serif',
         padding: '7px 12px',
         ...(fixed ? { position: 'fixed', top: 16, left: 16, zIndex: 100 } : {}),
       }}
@@ -325,7 +318,7 @@ function ActionBtn({ onClick, disabled, accent, children }) {
       color: accent ? '#f0ebe0' : 'rgba(255,255,255,0.6)',
       border: accent ? '1px solid rgba(200,169,110,0.3)' : '1px solid rgba(255,255,255,0.12)',
       borderRadius: 8, cursor: disabled ? 'not-allowed' : 'pointer',
-      fontSize: 13, fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
+      fontSize: 13, fontWeight: 600,
     }}>
       {children}
     </button>

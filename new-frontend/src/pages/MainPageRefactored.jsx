@@ -32,9 +32,7 @@ function MainPage() {
   const { isOverLimit, isBlocking, daysRemaining, loading: planLoading } = usePlan();
   const [overageModalOpen, setOverageModalOpen] = useState(false);
 
-  const [showDateInputField, setShowDateInputField] = useState(false);
-
-  const visibility = useUIVisibility(selectedCrop, showDateInputField);
+  const visibility = useUIVisibility(selectedCrop);
 
   useEffect(() => {
     startTutorialIfNew();
@@ -49,14 +47,6 @@ function MainPage() {
 
   const goBack = () => {
     resetForm();
-    setShowDateInputField(false);
-  };
-
-  const toggleDateInputField = () => {
-    setShowDateInputField(prev => !prev);
-    if (!showDateInputField) {
-      resetHarvestDate();
-    }
   };
 
   const submitEntryAndGoBack = async () => {
@@ -97,35 +87,11 @@ function MainPage() {
 
       <MainPageHeader
         visibility={visibility}
-        showDateInputField={showDateInputField}
-        toggleDateInputField={toggleDateInputField}
         goBack={goBack}
         harvestDate={harvestDate}
         setHarvestDate={setHarvestDate}
+        onTutorial={startTutorial}
       />
-
-      <button
-        onClick={startTutorial}
-        title="Help / Tour"
-        style={{
-          position: "fixed",
-          bottom: 20,
-          right: 20,
-          width: 40,
-          height: 40,
-          borderRadius: "50%",
-          background: "#4f7942",
-          border: "none",
-          color: "#fff",
-          fontSize: 18,
-          fontWeight: 700,
-          cursor: "pointer",
-          zIndex: 9999,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.35)",
-        }}
-      >
-        ?
-      </button>
 
       <br />
 

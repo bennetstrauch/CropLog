@@ -14,10 +14,9 @@ const SelectCrop = ({ harvestDate, harvestedFieldsRef }) => {
 
   return (
     <div>
-      NewEntry
+      New Entry for
       {/* <DisplayLatestEntry/> */}
       <br />
-      <p> Please select crop: </p>
       <CropButtons {...{ harvestedFieldsRef, harvestDate }} />
       <br />
       {modifyCropsButton}

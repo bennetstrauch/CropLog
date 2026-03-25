@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-export default function useUIVisibility(selectedCrop, showDateInputField) {
+export default function useUIVisibility(selectedCrop) {
   const visibility = useMemo(() => {
     const cropIsSelected = selectedCrop !== '';
     const cropIsNotSelected = selectedCrop === '';
@@ -8,11 +8,10 @@ export default function useUIVisibility(selectedCrop, showDateInputField) {
     return {
       beforeCropSelection: cropIsNotSelected,
       afterCropSelection: cropIsSelected,
-      dateInputField: showDateInputField && cropIsNotSelected,
       cropIsSelected,
       cropIsNotSelected,
     };
-  }, [selectedCrop, showDateInputField]);
+  }, [selectedCrop]);
 
   return visibility;
 }

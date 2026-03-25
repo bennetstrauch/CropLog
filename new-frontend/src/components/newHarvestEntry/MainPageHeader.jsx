@@ -3,15 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../reduxStore/Slices/AuthSlice';
 import { Path_HarvestLog } from '../../routes/AppRouter';
-import DateInputField from './DateInputField';
 
 export default function MainPageHeader({
   visibility,
-  showDateInputField,
-  toggleDateInputField,
   goBack,
   harvestDate,
-  setHarvestDate
+  setHarvestDate,
+  onTutorial,
 }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -55,24 +53,31 @@ export default function MainPageHeader({
             borderRadius: 6,
             boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
             zIndex: 1000,
-            minWidth: 140,
           }}>
-            <button
-              onClick={() => { navigate('/profile'); setMenuOpen(false); }}
-              style={{
-                display: 'block',
-                width: '100%',
-                padding: '10px 16px',
-                textAlign: 'left',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: 14,
-                color: '#111827',
-              }}
-            >
-              👤 Profile
-            </button>
+            {[
+              { label: 'Profile',  action: () => { navigate('/profile'); setMenuOpen(false); } },
+              { label: 'Tutorial', action: () => { onTutorial?.(); setMenuOpen(false); } },
+              { label: 'Logout',   action: () => { handleLogout(); setMenuOpen(false); } },
+            ].map(({ label, action }) => (
+              <button
+                key={label}
+                onClick={action}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '10px 16px',
+                  textAlign: 'left',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  color: '#111827',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         )}
       </div>
@@ -90,23 +95,44 @@ export default function MainPageHeader({
       )}
 
       {visibility.beforeCropSelection && (
-        <button onClick={toggleDateInputField}>
-          {showDateInputField ? 'Hide Date Input' : 'Modify Date'}
-        </button>
+        <ModifyDateButton harvestDate={harvestDate} setHarvestDate={setHarvestDate} />
       )}
 
-      <button onClick={handleLogout}>
-        Logout
-      </button>
-
-      {visibility.dateInputField && (
-        <div>
-          <DateInputField
-            harvestDate={harvestDate}
-            setHarvestDate={setHarvestDate}
-          />
-        </div>
-      )}
     </header>
+  );
+}
+
+function ModifyDateButton({ harvestDate, setHarvestDate }) {
+  const inputRef = useRef(null);
+
+  const handleClick = () => {
+    try {
+      inputRef.current?.showPicker();
+    } catch {
+      inputRef.current?.focus();
+    }
+  };
+
+  return (
+    <span style={{ position: 'relative', display: 'inline-block' }}>
+      <button onClick={handleClick}>Modify Date</button>
+      <input
+        ref={inputRef}
+        type="date"
+        value={harvestDate}
+        onChange={(e) => setHarvestDate(e.target.value)}
+        style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          opacity: 0,
+          pointerEvents: 'none',
+          width: '100%',
+          height: 0,
+          padding: 0,
+          border: 0,
+        }}
+      />
+    </span>
   );
 }

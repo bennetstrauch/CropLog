@@ -1,32 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 function DateInputField({ harvestDate, setHarvestDate }) {
-  const handleInputChange = (event) => {
-    let input = event.target.value;
+  const inputRef = useRef(null);
 
-    // Only allow numbers and dashes
-    input = input.replace(/[^0-9-]/g, "");
-
-    // Ensure the format is YYYY-MM-DD and doesn't exceed 10 characters
-    if (input.length > 10) {
-      input = input.slice(0, 10);
+  useEffect(() => {
+    try {
+      inputRef.current?.showPicker();
+    } catch {
+      // showPicker() not supported in all browsers — silently ignore
     }
+  }, []);
 
-    setHarvestDate(input);
-  };
-
-
-  
   return (
     <div>
-      <label htmlFor="date">Enter Date (YYYY-MM-DD): </label>
+      <label htmlFor="date">Date: </label>
       <input
-        type="text"
+        ref={inputRef}
+        type="date"
         id="date"
         value={harvestDate}
-        onChange={handleInputChange}
-        maxLength="10" // Limit the input length to 10 characters (YYYY-MM-DD)
-        placeholder="YYYY-MM-DD"
+        onChange={(e) => setHarvestDate(e.target.value)}
       />
     </div>
   );

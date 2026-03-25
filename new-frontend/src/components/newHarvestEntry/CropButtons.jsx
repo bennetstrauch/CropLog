@@ -54,7 +54,7 @@ function CropButtons({ harvestDate, harvestedFieldsRef }) {
   }
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
       {mapToHTML(activeCrops, (crop) => (
 
         <button key={crop.id} onClick={() => handleClick(crop)}>

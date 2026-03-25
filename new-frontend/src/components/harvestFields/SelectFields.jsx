@@ -16,7 +16,9 @@ function SelectFields({ harvestedFieldsRef }) {
   return (
     <div>
       Select Field(s): &nbsp;
-      {createButtonsForEachField}
+      <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '6px' }}>
+        {createButtonsForEachField}
+      </div>
     </div>
   );
 }

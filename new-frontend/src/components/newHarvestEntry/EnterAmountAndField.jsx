@@ -18,6 +18,7 @@ function EnterAmountAndField({
 
   const enterAmountInput = (
     <input
+      autoFocus
       type="number"
       step={measureUnitCanBeDecimalNumber ? "any" : "number"} // Allow decimals when needed
       name="amount"

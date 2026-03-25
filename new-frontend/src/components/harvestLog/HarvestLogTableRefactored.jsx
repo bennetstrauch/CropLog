@@ -325,7 +325,7 @@ const HarvestLogTableRefactored = ({ dateRange, setDateRange }) => {
               </button>
               <button
                 onClick={handleExportCsv}
-                className="px-3 py-1.5 rounded-full text-sm font-medium border border-gray-300 text-gray-600 hover:bg-gray-100 transition-all duration-200 flex items-center gap-1"
+                className="px-4 py-1.5 !bg-teal-700 text-white text-sm font-semibold rounded-lg hover:!bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 flex items-center gap-1.5"
                 title={`Export current ${isSummaryMode ? 'summary' : 'detail'} view as CSV`}
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
