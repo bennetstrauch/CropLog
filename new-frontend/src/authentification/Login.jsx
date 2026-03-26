@@ -22,12 +22,19 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState("");
   const [resendStatus, setResendStatus] = useState("");
+  const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {
     if (loggedIn) {
       navigate("/");
     }
   }, [loggedIn]);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown(c => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const handleLogin = async () => {
     setError("");
@@ -63,6 +70,7 @@ const Login = () => {
     try {
       await resendVerification(unverifiedEmail);
       setResendStatus("Verification email sent! Check your inbox.");
+      setCooldown(60);
     } catch {
       setResendStatus("Failed to resend. Please try again.");
     }
@@ -70,34 +78,38 @@ const Login = () => {
 
   return (
     <div>
-      <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+      <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         <input
+          className="auth-input"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
         />
-        <br />
         <input
+          className="auth-input"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
         />
-        <br />
         <button type="submit" disabled={loading}>
           {loading ? (
-            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center" }}>
               <Spinner size="sm" /> Logging in...
             </span>
           ) : "Login"}
         </button>
       </form>
       {error && <p style={{ color: "red" }}>{error}</p>}
-      <button onClick={() => navigate("/forgot-password", { state: { email } })}>Forgot password?</button>
+      <button className="auth-link" onClick={() => navigate("/forgot-password", { state: { email } })}>
+        Forgot password?
+      </button>
       {unverifiedEmail && (
         <div>
-          <button onClick={handleResend}>Resend verification email</button>
+          <button onClick={handleResend} disabled={cooldown > 0}>
+            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend verification email"}
+          </button>
           {resendStatus && <p>{resendStatus}</p>}
         </div>
       )}

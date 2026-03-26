@@ -57,25 +57,14 @@ const Register = () => {
   }
 
   return (
-    <div>
-      <h2>Register</h2>
-      <form onSubmit={handleRegister}>
-        <div>
-          <label>Name:</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} minLength="6" required />
-        </div>
+    <div>      <form onSubmit={handleRegister} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        <input className="auth-input" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" required />
+        <input className="auth-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
+        <input className="auth-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" minLength="6" required />
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <button type="submit" disabled={loading}>
           {loading ? (
-            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center" }}>
               <Spinner size="sm" /> Registering...
             </span>
           ) : "Register"}
