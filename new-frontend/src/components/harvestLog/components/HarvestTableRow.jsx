@@ -41,7 +41,9 @@ const HarvestTableRow = ({
       ? 'bg-blue-50 hover:bg-blue-100'
       : isToday(entry.harvestDate)
         ? 'bg-green-50 hover:bg-green-100'
-        : 'bg-white hover:bg-yellow-100';
+        : index % 2 === 0
+          ? 'bg-white hover:bg-yellow-50'
+          : 'bg-yellow-50 hover:bg-yellow-100';
 
   // All field names: live + archived (with badge)
   const allFieldNames = [
@@ -52,7 +54,7 @@ const HarvestTableRow = ({
   return (
     <tr className={`transition-colors duration-150 ${rowBgClass}`} title={isArchived ? 'This record is archived (read-only)' : undefined}>
       {/* Date Column */}
-      <td className="px-6 py-4 whitespace-nowrap" style={{width: '15%'}}>
+      <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap" style={{width: '15%'}}>
         {isArchived ? (
           <span className="text-sm text-gray-500">{entry.harvestDate}</span>
         ) : (
@@ -74,7 +76,7 @@ const HarvestTableRow = ({
       </td>
 
       {/* Crop Column */}
-      <td className="px-6 py-4 whitespace-nowrap" style={{width: '50%'}}>
+      <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap" style={{width: '50%'}}>
         {isArchived ? (
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">{entry.cropName}</span>
@@ -103,7 +105,7 @@ const HarvestTableRow = ({
       </td>
 
       {/* Quantity Column */}
-      <td className="px-6 py-4 whitespace-nowrap" style={{width: '15%'}}>
+      <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap" style={{width: '15%'}}>
         {isArchived ? (
           <span className="text-sm text-gray-600">{entry.quantity}</span>
         ) : (
@@ -125,7 +127,7 @@ const HarvestTableRow = ({
       </td>
 
       {/* Unit Column */}
-      <td className="px-6 py-4 whitespace-nowrap" style={{width: '10%'}}>
+      <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap" style={{width: '10%'}}>
         <div className="flex items-center gap-1 text-sm text-gray-900">
           {entry.measureUnitName}
           {isArchived && entry.archivedMeasureUnitName && (
@@ -135,7 +137,7 @@ const HarvestTableRow = ({
       </td>
 
       {/* Fields Column */}
-      <td className="px-6 py-4" style={{width: '25%'}}>
+      <td className="px-2 py-2 sm:px-6 sm:py-4" style={{width: '25%'}}>
         {isArchived ? (
           <div className="flex flex-wrap gap-1">
             {entry.harvestedFieldNames.map(name => (
@@ -157,7 +159,7 @@ const HarvestTableRow = ({
       </td>
 
       {/* Selection Column */}
-      <td className="px-6 py-4 whitespace-nowrap text-center" style={{width: '5%'}}>
+      <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-center" style={{width: '5%'}}>
         <input
           type="checkbox"
           checked={isSelected}

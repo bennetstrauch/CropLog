@@ -27,7 +27,7 @@ const SortableHeader = ({ field, currentSort, direction, onSort, children, sorta
 
   return (
     <th
-      className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+      className={`px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
         sortable
           ? 'cursor-pointer hover:bg-gray-100 transition-colors select-none'
           : ''

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { resetPassword, getErrorMessage } from "../service/apiService";
+import Spinner from "../components/universal/Spinner";
 
 const passwordSchema = z.object({
   newPassword: z.string().min(6, "Password must be at least 6 characters."),
@@ -62,26 +63,30 @@ const ResetPassword = () => {
   return (
     <div>
       <h2>Set a new password</h2>
-      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
         <input
+          className="auth-input"
           type="password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           placeholder="New password"
         />
-        <br />
         <input
+          className="auth-input"
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           placeholder="Confirm new password"
         />
-        <br />
+        {error && <p style={{ color: "red" }}>{error}</p>}
         <button type="submit" disabled={status === "loading"}>
-          {status === "loading" ? "Saving..." : "Set new password"}
+          {status === "loading" ? (
+            <span style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center" }}>
+              <Spinner size="sm" /> Saving...
+            </span>
+          ) : "Set new password"}
         </button>
       </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 };
