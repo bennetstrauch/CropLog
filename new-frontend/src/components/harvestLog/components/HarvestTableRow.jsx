@@ -42,8 +42,8 @@ const HarvestTableRow = ({
       : isToday(entry.harvestDate)
         ? 'bg-green-50 hover:bg-green-100'
         : index % 2 === 0
-          ? 'bg-white hover:bg-yellow-50'
-          : 'bg-yellow-50 hover:bg-yellow-100';
+          ? 'bg-yellow-50 hover:bg-yellow-100'
+          : 'bg-yellow-100 hover:bg-yellow-200';
 
   // All field names: live + archived (with badge)
   const allFieldNames = [
