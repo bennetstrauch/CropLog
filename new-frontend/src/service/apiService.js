@@ -183,6 +183,13 @@ export async function sendChatMessage(prompt, chatId) {
   return get(`ai?${params.toString()}`);
 }
 
+export async function transcribeAudio(audioBlob) {
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "recording.webm");
+  const response = await API.post("ai/transcribe", formData);
+  return response.data;
+}
+
 export const loginUser = (credentials) => post("auth/login", credentials);
 export const registerUser = (userData) => post("auth/register", userData);
 export const verifyEmail = (token) => API.get(`auth/verify?token=${token}`);

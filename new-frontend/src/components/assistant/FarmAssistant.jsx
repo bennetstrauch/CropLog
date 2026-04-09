@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { usePlan } from "../../context/PlanProvider";
-import { sendChatMessage } from "../../service/apiService";
+import { sendChatMessage, transcribeAudio } from "../../service/apiService";
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const canRecord = !!(navigator.mediaDevices && window.MediaRecorder);
 
 export default function FarmAssistant() {
   const { plan, loading: planLoading } = usePlan();
@@ -14,10 +14,12 @@ export default function FarmAssistant() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
 
   const chatId = useMemo(() => crypto.randomUUID(), []);
   const messagesEndRef = useRef(null);
-  const recognitionRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -52,10 +54,7 @@ export default function FarmAssistant() {
     const text = input.trim();
     if (!text || loading) return;
 
-    // Stop mic if active before sending
-    if (listening) {
-      recognitionRef.current?.stop();
-    }
+    if (listening) await stopAndTranscribe();
 
     setMessages((prev) => [...prev, { role: "user", text }]);
     setInput("");
@@ -81,31 +80,55 @@ export default function FarmAssistant() {
     }
   };
 
-  const toggleVoice = () => {
-    if (!SpeechRecognition) return;
+  const stopAndTranscribe = async () => {
+    return new Promise((resolve) => {
+      const recorder = mediaRecorderRef.current;
+      if (!recorder) return resolve();
+
+      recorder.onstop = async () => {
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        audioChunksRef.current = [];
+        setListening(false);
+        setTranscribing(true);
+        try {
+          const transcript = await transcribeAudio(blob);
+          if (transcript?.trim()) setInput(transcript.trim());
+        } catch {
+          // silently ignore transcription errors
+        } finally {
+          setTranscribing(false);
+        }
+        resolve();
+      };
+
+      recorder.stop();
+      recorder.stream.getTracks().forEach((t) => t.stop());
+    });
+  };
+
+  const toggleVoice = async () => {
+    if (!canRecord) return;
 
     if (listening) {
-      recognitionRef.current?.stop();
+      await stopAndTranscribe();
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = navigator.language;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
 
-    recognition.onstart = () => setListening(true);
-    recognition.onend = () => setListening(false);
-    recognition.onerror = () => setListening(false);
-    recognition.onresult = (e) => {
-      const transcript = Array.from(e.results)
-        .map((r) => r[0].transcript)
-        .join("");
-      setInput(transcript);
-    };
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
 
-    recognitionRef.current = recognition;
-    recognition.start();
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setListening(true);
+    } catch {
+      // User denied microphone permission
+    }
   };
 
   if (planLoading) return null;
@@ -183,14 +206,15 @@ export default function FarmAssistant() {
               placeholder="Ask your assistant…"
               className="flex-1 resize-none rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-[#2e5239] leading-relaxed focus:outline-none focus:border-[#3a6647] transition-colors placeholder:text-gray-400"
             />
-            {SpeechRecognition && (
+            {canRecord && (
               <button
                 onClick={toggleVoice}
-                title={listening ? "Stop listening" : "Speak"}
+                disabled={transcribing}
+                title={listening ? "Stop & transcribe" : transcribing ? "Transcribing…" : "Speak"}
                 className="flex-shrink-0 p-2 transition-colors"
                 style={{ backgroundColor: "transparent", border: "none", padding: "0.5rem" }}
               >
-                {listening ? <MicActiveIcon /> : <MicIcon />}
+                {transcribing ? <MicLoadingIcon /> : listening ? <MicActiveIcon /> : <MicIcon />}
               </button>
             )}
             <button
@@ -263,6 +287,15 @@ function MicActiveIcon() {
         <path strokeLinecap="round" strokeLinejoin="round" d="M19 10v2a7 7 0 01-14 0v-2M12 19v3M9 22h6" />
       </svg>
     </span>
+  );
+}
+
+function MicLoadingIcon() {
+  return (
+    <svg className="w-5 h-5 text-gray-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <rect x="9" y="2" width="6" height="11" rx="3" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 10v2a7 7 0 01-14 0v-2M12 19v3M9 22h6" />
+    </svg>
   );
 }
 
