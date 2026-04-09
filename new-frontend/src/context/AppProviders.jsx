@@ -9,6 +9,7 @@ import { NotificationProvider } from "./NotificationContext";
 import { TutorialProvider } from "./TutorialContext";
 import { PlanProvider, usePlan } from "./PlanProvider";
 import PlanOverageModal from "../components/plan/PlanOverageModal";
+import FarmAssistant from "../components/assistant/FarmAssistant";
 
 function BlockingOverlay() {
   const { isBlocking, isOverLimit, loading } = usePlan();
@@ -26,6 +27,7 @@ export default function AppProviders({ children }) {
               <MeasureUnitsProvider>
                 <CategoriesProvider>
                   <BlockingOverlay />
+                  <FarmAssistant />
                   {children ?? <Outlet />}
                 </CategoriesProvider>
               </MeasureUnitsProvider>

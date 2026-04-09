@@ -34,7 +34,9 @@ API.interceptors.response.use(
   (error) => {
     const hasToken = !!localStorage.getItem("jwt_token");
     if (hasToken && error.response && (error.response.status === 401 ||
-        (error.response.status === 403 && error.response.data?.code !== 'PLAN_LIMIT_EXCEEDED'))) {
+        (error.response.status === 403 &&
+        error.response.data?.code !== 'PLAN_LIMIT_EXCEEDED' &&
+        error.response.data?.code !== 'PREMIUM_REQUIRED'))) {
       triggerLogout();
     }
     return Promise.reject(error);
@@ -175,6 +177,11 @@ export const getPlanInfo = () => get("plan");
 
 export const trimToFree = (keepCropIds, keepFieldIds, keepMeasureUnitIds) =>
   post("plan/trim-to-free", { keepCropIds, keepFieldIds, keepMeasureUnitIds });
+
+export async function sendChatMessage(prompt, chatId) {
+  const params = new URLSearchParams({ prompt, chatId });
+  return get(`ai?${params.toString()}`);
+}
 
 export const loginUser = (credentials) => post("auth/login", credentials);
 export const registerUser = (userData) => post("auth/register", userData);
