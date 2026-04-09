@@ -32,14 +32,20 @@ export default function FarmAssistant() {
     el.style.height = Math.min(el.scrollHeight, 80) + "px";
   }, [input]);
 
-  const handleButtonClick = () => {
+  const open = () => {
+    setIsOpen(true);
+    setShowLockedHint(false);
+  };
+
+  const close = () => setIsOpen(false);
+
+  const handleFabClick = () => {
     if (planLoading) return;
     if (!isPremium) {
       setShowLockedHint((v) => !v);
       return;
     }
-    setIsOpen((v) => !v);
-    setShowLockedHint(false);
+    open();
   };
 
   const send = async () => {
@@ -100,25 +106,27 @@ export default function FarmAssistant() {
   if (planLoading) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-      {/* Premium locked hint */}
-      {showLockedHint && !isPremium && (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 w-56 text-sm">
-          <p className="font-semibold text-gray-900 mb-1">FARM Plan Feature</p>
-          <p className="text-gray-500 leading-relaxed">
-            Upgrade to the FARM plan to chat with your personal farm assistant.
-          </p>
-        </div>
-      )}
-
-      {/* Chat window */}
+    <>
+      {/* Chat window — full screen on mobile, floating panel on desktop */}
       {isOpen && isPremium && (
-        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden"
-          style={{ width: 340, height: 480 }}>
+        <div className="
+          fixed inset-0 z-50 flex flex-col bg-white
+          sm:inset-auto sm:bottom-6 sm:right-6 sm:w-[340px] sm:h-[500px]
+          sm:rounded-2xl sm:shadow-2xl sm:border sm:border-gray-100
+        ">
           {/* Header */}
-          <div className="flex items-center gap-2.5 px-4 py-3 bg-[#3a6647]">
-            <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
-            <span className="text-white font-medium text-sm tracking-wide">Farm Assistant</span>
+          <div className="flex items-center justify-between px-4 py-3 bg-[#3a6647] sm:rounded-t-2xl flex-shrink-0">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
+              <span className="text-white font-medium text-sm tracking-wide">Farm Assistant</span>
+            </div>
+            <button
+              onClick={close}
+              className="text-white/70 hover:text-white transition-colors p-1"
+              title="Close"
+            >
+              <CloseIcon />
+            </button>
           </div>
 
           {/* Messages */}
@@ -160,7 +168,7 @@ export default function FarmAssistant() {
           </div>
 
           {/* Input area */}
-          <div className="px-3 py-3 border-t border-gray-100 flex items-end gap-2">
+          <div className="px-3 py-3 border-t border-gray-100 flex items-end gap-2 flex-shrink-0">
             <textarea
               ref={textareaRef}
               value={input}
@@ -168,19 +176,15 @@ export default function FarmAssistant() {
               onKeyDown={handleKeyDown}
               rows={1}
               placeholder="Ask your assistant…"
-              className="flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm leading-relaxed focus:outline-none focus:border-[#3a6647] transition-colors"
+              className="flex-1 resize-none rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-[#2e5239] leading-relaxed focus:outline-none focus:border-[#3a6647] transition-colors placeholder:text-gray-400"
             />
             {SpeechRecognition && (
               <button
                 onClick={toggleVoice}
                 title={listening ? "Stop listening" : "Speak"}
-                className={`flex-shrink-0 p-2 rounded-xl transition-colors ${
-                  listening
-                    ? "bg-red-500 text-white"
-                    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                }`}
+                className="flex-shrink-0 p-2 transition-colors"
               >
-                <MicIcon />
+                {listening ? <MicActiveIcon /> : <MicIcon />}
               </button>
             )}
             <button
@@ -194,15 +198,27 @@ export default function FarmAssistant() {
         </div>
       )}
 
-      {/* Floating action button */}
-      <button
-        onClick={handleButtonClick}
-        title="Farm Assistant"
-        className="w-14 h-14 rounded-full bg-[#3a6647] text-white shadow-lg hover:bg-[#2e5239] hover:shadow-xl transition-all flex items-center justify-center"
-      >
-        {isOpen ? <CloseIcon /> : <LeafIcon />}
-      </button>
-    </div>
+      {/* Floating action button — hidden when chat is open on mobile */}
+      <div className={`fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 ${isOpen ? "hidden sm:flex" : "flex"}`}>
+        {/* Premium locked hint */}
+        {showLockedHint && !isPremium && (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 w-56 text-sm">
+            <p className="font-semibold text-gray-900 mb-1">FARM Plan Feature</p>
+            <p className="text-gray-500 leading-relaxed">
+              Upgrade to the FARM plan to chat with your personal farm assistant.
+            </p>
+          </div>
+        )}
+
+        <button
+          onClick={handleFabClick}
+          title="Farm Assistant"
+          className="w-14 h-14 rounded-full bg-[#3a6647] text-white shadow-lg hover:bg-[#2e5239] hover:shadow-xl transition-all flex items-center justify-center"
+        >
+          <LeafIcon />
+        </button>
+      </div>
+    </>
   );
 }
 
@@ -225,10 +241,22 @@ function CloseIcon() {
 
 function MicIcon() {
   return (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <rect x="9" y="2" width="6" height="11" rx="3" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M19 10v2a7 7 0 01-14 0v-2M12 19v3M9 22h6" />
     </svg>
+  );
+}
+
+function MicActiveIcon() {
+  return (
+    <span className="relative flex items-center justify-center w-5 h-5">
+      <span className="absolute inline-flex w-full h-full rounded-full bg-red-400 opacity-60 animate-ping" />
+      <svg className="relative w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <rect x="9" y="2" width="6" height="11" rx="3" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19 10v2a7 7 0 01-14 0v-2M12 19v3M9 22h6" />
+      </svg>
+    </span>
   );
 }
 

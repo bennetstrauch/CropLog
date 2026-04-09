@@ -48,7 +48,6 @@ const Register = () => {
         <h2>Check your inbox</h2>
         <p>We sent a verification link to <strong>{email}</strong>.</p>
         <p>Click the link in the email to activate your account, then log in.</p>
-        <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>The email can take up to a minute to arrive. In the meantime you can already head to login.</p>
         <button onClick={handleResend}>Resend verification email</button>
         {resendStatus && <p>{resendStatus}</p>}
         <button onClick={() => navigate('/login')}>Go to Login</button>
