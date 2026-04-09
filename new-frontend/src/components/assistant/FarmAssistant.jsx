@@ -52,6 +52,11 @@ export default function FarmAssistant() {
     const text = input.trim();
     if (!text || loading) return;
 
+    // Stop mic if active before sending
+    if (listening) {
+      recognitionRef.current?.stop();
+    }
+
     setMessages((prev) => [...prev, { role: "user", text }]);
     setInput("");
     setLoading(true);
@@ -85,7 +90,7 @@ export default function FarmAssistant() {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = navigator.language;
 
@@ -183,6 +188,7 @@ export default function FarmAssistant() {
                 onClick={toggleVoice}
                 title={listening ? "Stop listening" : "Speak"}
                 className="flex-shrink-0 p-2 transition-colors"
+                style={{ backgroundColor: "transparent", border: "none", padding: "0.5rem" }}
               >
                 {listening ? <MicActiveIcon /> : <MicIcon />}
               </button>
@@ -199,7 +205,7 @@ export default function FarmAssistant() {
       )}
 
       {/* Floating action button — hidden when chat is open on mobile */}
-      <div className={`fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 ${isOpen ? "hidden sm:flex" : "flex"}`}>
+      <div className={`fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 ${isOpen ? "hidden" : "flex"}`}>
         {/* Premium locked hint */}
         {showLockedHint && !isPremium && (
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 w-56 text-sm">
