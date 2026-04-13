@@ -1,6 +1,7 @@
 # Environment variables
 .env
 backend/.env
+new-frontend/.env.development
 
 # IDE files
 .vscode/settings.json
