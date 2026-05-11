@@ -1,5 +1,9 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { usePlan } from "../../context/PlanProvider";
+import { useCrops } from "../../context/CropsProvider";
+import { useFields } from "../../context/FieldsProvider";
+import { useCategories } from "../../context/CategoriesProvider";
+import { useMeasureUnits } from "../../context/MeasureUnitsProvider";
 import { sendChatMessage, transcribeAudio } from "../../service/apiService";
 
 const canRecord = !!(navigator.mediaDevices && window.MediaRecorder);
@@ -7,6 +11,10 @@ const canRecord = !!(navigator.mediaDevices && window.MediaRecorder);
 export default function FarmAssistant() {
   const { plan, loading: planLoading } = usePlan();
   const isPremium = plan?.plan === "FARM";
+  const { reload: reloadCrops } = useCrops();
+  const { reload: reloadFields } = useFields();
+  const { reload: reloadCategories } = useCategories();
+  const { reload: reloadMeasureUnits } = useMeasureUnits();
 
   const [isOpen, setIsOpen] = useState(false);
   const [showLockedHint, setShowLockedHint] = useState(false);
@@ -15,6 +23,8 @@ export default function FarmAssistant() {
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
+  const [rateLimitInfo, setRateLimitInfo] = useState(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
 
   const chatId = useMemo(() => crypto.randomUUID(), []);
   const messagesEndRef = useRef(null);
@@ -25,6 +35,18 @@ export default function FarmAssistant() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  useEffect(() => {
+    if (!rateLimitInfo) return;
+    const tick = () => {
+      const s = Math.max(0, Math.ceil((rateLimitInfo.resetAt.getTime() - Date.now()) / 1000));
+      setSecondsLeft(s);
+      if (s <= 0) setRateLimitInfo(null);
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [rateLimitInfo]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -63,11 +85,20 @@ export default function FarmAssistant() {
     try {
       const reply = await sendChatMessage(text, chatId);
       setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", text: "Sorry, something went wrong. Please try again." },
-      ]);
+      reloadCrops();
+      reloadFields();
+      reloadCategories();
+      reloadMeasureUnits();
+    } catch (err) {
+      if (err.response?.status === 429) {
+        const { reason, resetAt } = err.response.data;
+        setRateLimitInfo({ reason, resetAt: new Date(resetAt) });
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", text: "Sorry, something went wrong. Please try again." },
+        ]);
+      }
     } finally {
       setLoading(false);
     }
@@ -176,6 +207,17 @@ export default function FarmAssistant() {
               </div>
             ))}
 
+            {/* Rate limit notice */}
+            {rateLimitInfo && (
+              <div className="flex justify-start">
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm text-amber-800 max-w-[82%] leading-relaxed">
+                  {rateLimitInfo.reason === "per_minute"
+                    ? `Too many messages. You can send again in ${secondsLeft}s.`
+                    : `Daily limit reached. Resets at midnight.`}
+                </div>
+              </div>
+            )}
+
             {/* Typing indicator */}
             {loading && (
               <div className="flex justify-start">
@@ -219,7 +261,7 @@ export default function FarmAssistant() {
             )}
             <button
               onClick={send}
-              disabled={!input.trim() || loading}
+              disabled={!input.trim() || loading || !!rateLimitInfo}
               className="flex-shrink-0 p-2 rounded-xl bg-[#3a6647] text-white transition-colors hover:bg-[#2e5239] disabled:opacity-40"
             >
               <SendIcon />

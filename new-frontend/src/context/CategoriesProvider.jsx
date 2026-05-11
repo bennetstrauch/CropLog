@@ -32,8 +32,17 @@ export const CategoriesProvider = ({ children }) => {
     [categories]
   );
 
+  const reload = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to reload categories:", err);
+    }
+  };
+
   const value = useMemo(
-    () => ({ categories, setCategories, categoriesMap, loading }),
+    () => ({ categories, setCategories, categoriesMap, loading, reload }),
     [categories, categoriesMap, loading]
   );
 
