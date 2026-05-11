@@ -11,7 +11,16 @@
       "Bash(cat:*)",
       "Skill(update-config)",
       "Bash(xargs grep:*)",
-      "Bash(grep -r \"403\\\\|402\\\\|plan\\\\|PlanLimit\" /c/Projects/CropLog/new-frontend/src --include=*.js --include=*.jsx --include=*.ts --include=*.tsx)"
+      "Bash(grep -r \"403\\\\|402\\\\|plan\\\\|PlanLimit\" /c/Projects/CropLog/new-frontend/src --include=*.js --include=*.jsx --include=*.ts --include=*.tsx)",
+      "Bash(gh label *)",
+      "PowerShell(gh label *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(Get-AppxPackage *)",
+      "PowerShell(Select-String *)",
+      "PowerShell(cmd /c \"where gh\")",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ],
     "deny": [],
     "ask": []
